@@ -4,21 +4,88 @@ This project provides a Python API for fetching historical data from the Binance
 
 ### Usage
 
-To use the functions in `binance_history/api.py`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here's an example:
+To use the functions in `binance_history/api.py`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here are some examples:
+
+#### Fetch Aggregated Trades Data
 
 ```python
-from datetime import datetime
-from binance_history.api import fetch_klines
+agg_trades = bh.fetch_agg_trades(
+    symbol='BTCUSDT',
+    start='2024-01-01',
+    end='2024-05-01',
+    asset_type='spot',
+    tz='UTC'
+)
+print(agg_trades)
+```
 
-# Fetch klines data for BTCUSDT from 2022-01-01 to 2022-01-02
-symbol = "BTCUSDT"
-start = datetime(2022, 1, 1)
-end = datetime(2022, 1, 2)
-klines = fetch_klines(symbol, start, end)
+#### Fetch Book Ticker Data
 
-# Print the fetched klines data
+```python
+book_ticker = bh.fetch_book_ticker(
+    symbol='AAVEUSD_PERP',
+    start='2024-01-01',
+    end='2024-02-01',
+    asset_type='futures/cm',
+    tz='UTC'
+)
+print(book_ticker)
+```
+
+#### Fetch Funding Rate Data
+
+```python
+funding_rate = bh.fetch_funding_rate(
+    symbol='ETHUSDT',
+    start='2019-01-01',
+    end='2024-07-01',
+    asset_type='futures/um',
+    tz='UTC'
+)
+print(funding_rate)
+```
+
+#### Fetch Trades Data
+
+```python
+trade = bh.fetch_trades(
+    symbol='ETHUSDT',
+    start='2024-05-01',
+    end='2024-07-10',
+    asset_type='spot',
+    tz='UTC'
+)
+print(trade)
+```
+
+#### Fetch Klines Data
+
+```python
+klines = bh.fetch_klines(
+    symbol='BTCUSDT',
+    start='2018-01-01',
+    end='2024-07-12',
+    timeframe='1m',
+    asset_type='spot',
+    tz='UTC'
+)
 print(klines)
 ```
+
+#### Fetch Metrics Data
+
+```python
+metrics = bh.fetch_metrics(
+    symbol='BTCUSDT',
+    start='2024-01-01',
+    end='2024-04-01',
+    asset_type='futures/um',
+    tz='UTC'
+)
+print(metrics)
+```
+
+Make sure to replace the placeholders with the actual values for `symbol`, `start`, `end`, and other parameters as needed.
 
 Make sure you have the required dependencies installed (`pandas`, `pendulum`, `asyncio`, `uvloop`, `tqdm`) before running the code.
 
