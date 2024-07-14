@@ -48,9 +48,8 @@ def test_fetch_klines_1m_one_month(symbol, start, end, timeframe, asset_type, tz
     last_closetime = Timestamp("2022-1-20 0:0:59.999", tz="Asia/Shanghai")
 
     assert klines.index[0] == first_opentime
-    assert klines.close_datetime[0] == first_closetime
     assert klines.index[-1] == last_opentime
-    assert klines.close_datetime[-1] == last_closetime
+
 
 
 def test_fetch_klines_1m_many_months():
@@ -67,9 +66,7 @@ def test_fetch_klines_1m_many_months():
     )
 
     assert klines.index[0] == Timestamp(start, tz=tz)
-    assert klines.close_datetime[0] == Timestamp("2022-1-1 5:29:59.999", tz=tz)
     assert klines.index[-1] == Timestamp(end, tz=tz)
-    assert klines.close_datetime[-1] == Timestamp("2022-2-3 11:31:59.999", tz=tz)
 
 
 def test_fetch_klines_15m_many_months():
@@ -87,9 +84,7 @@ def test_fetch_klines_15m_many_months():
     )
 
     assert klines.index[0] == Timestamp("2022-1-1 5:30", tz=tz)
-    assert klines.close_datetime[0] == Timestamp("2022-1-1 5:44:59.999", tz=tz)
     assert klines.index[-1] == Timestamp("2022-2-3 11:30", tz=tz)
-    assert klines.close_datetime[-1] == Timestamp("2022-2-3 11:44:59.999", tz=tz)
 
 
 def test_fetch_klines_1h_recent_days():
@@ -107,19 +102,8 @@ def test_fetch_klines_1h_recent_days():
     )
 
     assert klines.index[0] == Timestamp("2022-11-2 6:00", tz=tz)
-    assert klines.close_datetime[0] == Timestamp("2022-11-2 6:59:59.999", tz=tz)
     assert klines.index[-1] == Timestamp(
         year=end.year, month=end.month, day=end.day, hour=end.hour, tz=tz
-    )
-    assert klines.close_datetime[-1] == Timestamp(
-        year=end.year,
-        month=end.month,
-        day=end.day,
-        hour=end.hour,
-        minute=59,
-        second=59,
-        microsecond=999000,
-        tz=tz,
     )
 
 

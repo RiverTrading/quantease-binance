@@ -152,6 +152,8 @@ def gen_dates(
     #     ).to_list()
     # else:
     #     days = []
+    start_year = None
+    start_month = None
     while months:
         month = months[-1]
         month_url = gen_data_url(
