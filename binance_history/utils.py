@@ -30,6 +30,7 @@ def gen_data_url(
     https://data.binance.vision/data/futures/cm/monthly/bookTicker/AAVEUSD_PERP/AAVEUSD_PERP-bookTicker-2024-01.zip
     https://data.binance.vision/data/futures/um/monthly/fundingRate/1000BONKUSDT/1000BONKUSDT-fundingRate-2024-01.zip
     https://data.binance.vision/data/spot/monthly/trades/1INCHBTC/1INCHBTC-trades-2024-04.zip
+    https://data.binance.vision/data/futures/um/daily/metrics/1000BONKUSDC/1000BONKUSDC-metrics-2024-07-01.zip
     """
     
     url: str
@@ -72,7 +73,14 @@ def gen_data_url(
         url = (
             f"https://data.binance.vision/data/{asset_type}/{freq}/{data_type}/{symbol}"
             f"/{symbol}-{data_type}-{date_str}.zip"
-        )    
+        ) 
+    elif data_type == "metrics":    
+        if asset_type == "spot":
+            raise ValueError(f"asset_type must be 'futures/cm' or 'future/um', but got '{asset_type}'")
+        url = (
+            f"https://data.binance.vision/data/{asset_type}/{freq}/{data_type}/{symbol}"
+            f"/{symbol}-{data_type}-{date_str}.zip"
+        )  
     else:
         raise ValueError(f"data_type must in 'klines', 'aggTrades', 'bookTicker', 'fundingRate', but got '{data_type}'")
     return url
@@ -219,7 +227,7 @@ def download_data(data_type: str, data_tz: str, url: str) -> DataFrame:
         return load_trades(data_tz, resp.content)
 
 async def download_data_async(data_type: str, data_tz: str, url: str, max_retries: int = 3) -> DataFrame:
-    assert data_type in ["klines", "aggTrades", "bookTicker", "fundingRate", "trades"]
+    assert data_type in ["klines", "aggTrades", "bookTicker", "fundingRate", "trades", "metrics"]
 
     async def attempt_download():
         async with aiohttp.ClientSession() as session:
@@ -254,6 +262,8 @@ async def download_data_async(data_type: str, data_tz: str, url: str, max_retrie
         return load_funding_rate(data_tz, content)
     elif data_type == "trades":
         return load_trades(data_tz, content)
+    elif data_type == "metrics":
+        return load_metrics(data_tz, content)
 
 
 def load_klines(data_tz: str, content: bytes) -> DataFrame:
@@ -346,6 +356,23 @@ def load_trades(data_tz: str, content: bytes) -> DataFrame:
             )
             df["datetime"] = pd.to_datetime(
                 df.time, unit="ms", utc=True
+            ).dt.tz_convert(data_tz)
+            df.set_index("datetime", inplace=True)
+    return df
+
+def load_metrics(data_tz: str, content: bytes) -> DataFrame:
+    with zipfile.ZipFile(io.BytesIO(content)) as zipf:
+        csv_name = zipf.namelist()[0]
+        with zipf.open(csv_name, "r") as csvfile:
+            df = pd.read_csv(
+                csvfile,
+                header=0,
+                usecols=range(8),
+                names=["create_time", "symbol", "sum_open_interest", "sum_open_interest_value", "count_toptrader_long_short_ratio", "sum_toptrader_long_short_ratio", 
+                       "count_long_short_ratio", "sum_taker_long_short_vol_ratio"],
+            )
+            df["datetime"] = pd.to_datetime(
+                df.create_time, utc=True
             ).dt.tz_convert(data_tz)
             df.set_index("datetime", inplace=True)
     return df

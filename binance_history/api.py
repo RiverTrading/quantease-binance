@@ -103,6 +103,24 @@ def fetch_funding_rate(
         tz=tz,
     )
 
+def fetch_metrics(
+    symbol: str,
+    start: Union[str, datetime],
+    end: Union[str, datetime],
+    asset_type: str,
+    tz: Optional[str] = None,
+) -> DataFrame:
+    """convinience function by calling ``fetch_data``"""
+
+    return fetch_data(
+        data_type="metrics",
+        asset_type=asset_type,
+        symbol=symbol,
+        start=start,
+        end=end,
+        tz=tz,
+    )
+
 def fetch_data(
     symbol: str,
     asset_type: str,

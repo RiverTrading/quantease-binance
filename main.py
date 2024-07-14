@@ -40,12 +40,21 @@ import binance_history as bh
 
 # print(trade)
 
-klines = bh.fetch_klines(
-    symbol='ETHUSDT',
-    start='2018-01-01',
-    end='2024-07-12',
-    timeframe='1m',
-    asset_type='spot',
+# klines = bh.fetch_klines(
+#     symbol='ETHUSDT',
+#     start='2018-01-01',
+#     end='2024-07-12',
+#     timeframe='1m',
+#     asset_type='spot',
+#     tz='UTC'
+# )
+# print(klines)
+
+metrics = bh.fetch_metrics(
+    symbol = 'BTCUSDT',
+    start = '2024-01-01',
+    end = '2024-04-01',
+    asset_type = 'futures/um',
     tz='UTC'
 )
-print(klines)
+print(metrics)
