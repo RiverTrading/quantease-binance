@@ -130,32 +130,45 @@ def gen_dates(
 
     assert len(months) > 0
 
+    # if not exists_month(last_month_url):
+    #     daily_month = months.pop()
+    #     if len(months) > 1:
+    #         second_last_month_url = gen_data_url(
+    #             data_type,
+    #             asset_type,
+    #             "monthly",
+    #             symbol,
+    #             months[-1],
+    #             timeframe=timeframe,
+    #         )
+    #         if not exists_month(second_last_month_url):
+    #             daily_month = months.pop()
+
+    #     days = pd.date_range(
+    #         Timestamp(daily_month.year, daily_month.month, 1),
+    #         end,
+    #         freq="D",
+    #     ).to_list()
+    # else:
+    #     days = []
+    days = []
     last_month_url = gen_data_url(
         data_type, asset_type, "monthly", symbol, months[-1], timeframe=timeframe
     )
-
     if not exists_month(last_month_url):
-        daily_month = months.pop()
-        if len(months) > 1:
-            second_last_month_url = gen_data_url(
-                data_type,
-                asset_type,
-                "monthly",
-                symbol,
-                months[-1],
-                timeframe=timeframe,
+        while len(months) > 0:
+            month = months.pop()
+            month_url = gen_data_url(
+                data_type, asset_type, "monthly", symbol, month, timeframe=timeframe
             )
-            if not exists_month(second_last_month_url):
-                daily_month = months.pop()
-
+            if not exists_month(month_url):
+                start_year = month.year
+                start_month = month.month
         days = pd.date_range(
-            Timestamp(daily_month.year, daily_month.month, 1),
+            Timestamp(start_year, start_month, 1),
             end,
             freq="D",
         ).to_list()
-    else:
-        days = []
-
     return months, days
 
 
@@ -201,7 +214,7 @@ async def get_data_async(
 
 
 def download_data(data_type: str, data_tz: str, url: str) -> DataFrame:
-    assert data_type in ["klines", "aggTrades", "bookTicker", "fundingRate", "trades"]
+    assert data_type in ["klines", "aggTrades", "bookTicker", "fundingRate", "trades", "metrics"]
 
     try:
         resp = httpx.get(url)
@@ -225,6 +238,8 @@ def download_data(data_type: str, data_tz: str, url: str) -> DataFrame:
         return load_funding_rate(data_tz, resp.content)
     elif data_type == "trades":
         return load_trades(data_tz, resp.content)
+    elif data_type == "metrics":
+        return load_metrics(data_tz, resp.content)
 
 async def download_data_async(data_type: str, data_tz: str, url: str, max_retries: int = 3) -> DataFrame:
     assert data_type in ["klines", "aggTrades", "bookTicker", "fundingRate", "trades", "metrics"]
