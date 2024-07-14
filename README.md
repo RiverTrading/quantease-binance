@@ -4,11 +4,13 @@ This project provides a Python API for fetching historical data from the Binance
 
 ### Usage
 
-To use the functions in `binance_history/api.py`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here are some examples:
+To use the functions in `binance_history`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here are some examples:
 
 #### Fetch Aggregated Trades Data
 
 ```python
+import binace_history as bh
+
 agg_trades = bh.fetch_agg_trades(
     symbol='BTCUSDT',
     start='2024-01-01',
