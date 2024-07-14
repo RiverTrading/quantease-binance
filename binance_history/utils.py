@@ -191,58 +191,6 @@ def gen_dates(
     
     return months, days
 
-def binary_search_months(months, data_type, asset_type, symbol, timeframe):
-    left, right = 0, len(months) - 1
-    first_existing = None
-    last_non_existing = None
-
-    while left <= right:
-        mid = (left + right) // 2
-        if exists_month(gen_data_url(data_type, asset_type, "monthly", symbol, months[mid], timeframe=timeframe)):
-            first_existing = months[mid]
-            right = mid - 1
-        else:
-            last_non_existing = months[mid]
-            left = mid + 1
-
-    return first_existing, last_non_existing
-
-def gen_dates_v2(
-    data_type: str,
-    asset_type: str,
-    symbol: str,
-    start: Timestamp,
-    end: Timestamp,
-    timeframe: Optional[str] = None,
-):
-    assert start.tz is None and end.tz is None
-
-    if start > end:
-        raise ValueError("start cannot be greater than end")
-
-    months = pd.date_range(
-        Timestamp(start.year, start.month, 1),
-        end,
-        freq="MS",
-    ).to_list()
-
-    assert len(months) > 0
-
-    first_existing, last_non_existing = binary_search_months(months, data_type, asset_type, symbol, timeframe)
-
-    if first_existing:
-        months = [m for m in months if m >= first_existing]
-        days = pd.date_range(first_existing, end, freq="D").to_list()
-    else:
-        months = []
-        days = []
-
-    if last_non_existing:
-        warning_message = f"Data does not exist for the period: {months[0].strftime('%Y-%m')} to {last_non_existing.strftime('%Y-%m')}"
-        warnings.warn(warning_message, UserWarning)
-
-    return months, days
-
 def get_data(
     data_type: str,
     asset_type: str,

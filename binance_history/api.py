@@ -132,6 +132,7 @@ def fetch_data(
     end: datetime,
     tz: Optional[str] = "UTC",
     timeframe: Optional[str] = None,
+    use_async: bool = False,
 ) -> DataFrame:
     """
     :param symbol: The binance market pair name. e.g. ``'BTCUSDT'``.
@@ -170,20 +171,22 @@ def fetch_data(
         end.tz_convert(None),
         timeframe=timeframe,
     )
-    # monthly_dfs = [
-    #     get_data(data_type, asset_type, "monthly", symbol, dt, tz, timeframe)
-    #     for dt in tqdm(months, desc="Downloading data", unit="month")
-    # ]
-    # if data_type != "fundingRate":
-    #     daily_dfs = [
-    #         get_data(data_type, asset_type, "daily", symbol, dt, tz, timeframe)
-    #         for dt in tqdm(days, desc="Downloading data", unit="day")
-    #     ]
-    # else:
-    #     daily_dfs = []
-    # df = pd.concat(monthly_dfs + daily_dfs)
-    uvloop.install()
-    df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days))
+    if use_async:
+        uvloop.install()
+        df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days))
+    else:
+        monthly_dfs = [
+            get_data(data_type, asset_type, "monthly", symbol, dt, tz, timeframe)
+            for dt in tqdm(months, desc="Downloading data", unit="month")
+        ]
+        if data_type != "fundingRate":
+            daily_dfs = [
+                get_data(data_type, asset_type, "daily", symbol, dt, tz, timeframe)
+                for dt in tqdm(days, desc="Downloading data", unit="day")
+            ]
+        else:
+            daily_dfs = []
+        df = pd.concat(monthly_dfs + daily_dfs)
     return df.loc[start:end]
 
 async def _gather(
