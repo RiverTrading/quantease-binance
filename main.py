@@ -50,11 +50,11 @@ import binance_history as bh
 # )
 # print(klines)
 
-# metrics = bh.fetch_metrics(
-#     symbol = 'BTCUSDT',
-#     start = '2024-01-01',
-#     end = '2024-04-01',
-#     asset_type = 'futures/um',
-#     tz='UTC'
-# )
-# print(metrics)
+metrics = bh.fetch_metrics(
+    symbol = 'BTCUSDT',
+    start = '2024-01-01',
+    end = '2024-04-01',
+    asset_type = 'futures/um',
+    tz='UTC'
+)
+print(metrics)

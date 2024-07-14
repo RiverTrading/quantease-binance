@@ -128,7 +128,7 @@ def fetch_data(
     data_type: str,
     start: datetime,
     end: datetime,
-    tz: Optional[str] = None,
+    tz: Optional[str] = "UTC",
     timeframe: Optional[str] = None,
 ) -> DataFrame:
     """
