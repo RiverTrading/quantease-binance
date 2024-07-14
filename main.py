@@ -58,6 +58,16 @@ def main():
         tz='UTC'
     )
     print(metrics)
+    
+    spot_symbols = bh.fetch_all_symbols(asset_type='spot')
+    print(spot_symbols)
+    
+    futures_um_symbols = bh.fetch_all_symbols(asset_type='futures/um')
+    print(futures_um_symbols)
+    
+    futures_cm_symbols = bh.fetch_all_symbols(asset_type='futures/cm')
+    print(futures_cm_symbols)
+    
 
 if __name__ == '__main__':
     main()

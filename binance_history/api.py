@@ -5,19 +5,21 @@ import pendulum
 from pandas import DataFrame
 
 from .utils import gen_dates, get_data, unify_datetime, get_data_async
-from typing import Optional, Union, List
+from . import config
+from typing import Optional, Union, List, Literal
 import asyncio
 import uvloop
 
 from tqdm import tqdm
 from tqdm.asyncio import tqdm 
 
+
 def fetch_klines(
     symbol: str,
     start: Union[str, datetime],
     end: Union[str, datetime],
     timeframe: str = "1m",
-    asset_type: str = "spot",
+    asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot",
     tz: Optional[str] = None,
 ) -> DataFrame:
     """convinience function by calling ``fetch_data``"""
@@ -36,7 +38,7 @@ def fetch_trades(
     symbol: str,
     start: Union[str, datetime],
     end: Union[str, datetime],
-    asset_type: str = "spot",
+    asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot",
     tz: Optional[str] = None,
 ) -> DataFrame:
     """convinience function by calling ``fetch_data``"""
@@ -54,7 +56,7 @@ def fetch_agg_trades(
     symbol: str,
     start: Union[str, datetime],
     end: Union[str, datetime],
-    asset_type: str = "spot",
+    asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot",
     tz: Optional[str] = None,
 ) -> DataFrame:
     """convinience function by calling ``fetch_data``"""
@@ -72,7 +74,7 @@ def fetch_book_ticker(
     symbol: str,
     start: Union[str, datetime],
     end: Union[str, datetime],
-    asset_type: str = "spot",
+    asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot",
     tz: Optional[str] = None,
 ) -> DataFrame:
     """convinience function by calling ``fetch_data``"""
@@ -90,7 +92,7 @@ def fetch_funding_rate(
     symbol: str,
     start: Union[str, datetime],
     end: Union[str, datetime],
-    asset_type: str,
+    asset_type: Literal["spot", "futures/um", "futures/cm"],
     tz: Optional[str] = None,
 ) -> DataFrame:
     """convinience function by calling ``fetch_data``"""
@@ -108,7 +110,7 @@ def fetch_metrics(
     symbol: str,
     start: Union[str, datetime],
     end: Union[str, datetime],
-    asset_type: str,
+    asset_type: Literal["spot", "futures/um", "futures/cm"],
     tz: Optional[str] = None,
 ) -> DataFrame:
     """convinience function by calling ``fetch_data``"""
@@ -124,7 +126,7 @@ def fetch_metrics(
 
 def fetch_data(
     symbol: str,
-    asset_type: str,
+    asset_type: Literal["spot", "futures/um", "futures/cm"],
     data_type: str,
     start: datetime,
     end: datetime,
@@ -181,12 +183,12 @@ def fetch_data(
     #     daily_dfs = []
     # df = pd.concat(monthly_dfs + daily_dfs)
     uvloop.install()
-    df = asyncio.run(gather(symbol, asset_type, data_type, tz, timeframe, months, days))
+    df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days))
     return df.loc[start:end]
 
-async def gather(
+async def _gather(
     symbol: str,
-    asset_type: str,
+    asset_type: Literal["spot", "futures/um", "futures/cm"],
     data_type: str,
     tz: Optional[str] = None,
     timeframe: Optional[str] = None,
@@ -207,5 +209,27 @@ async def gather(
     dfs = await tqdm.gather(*monthly_dfs, *daily_dfs)
     df = pd.concat(dfs)
     return df
+
+def fetch_all_symbols(exchange = config.EXCHANGE, asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot") -> List[str]:
+    exchange.load_markets()
+    spot, futures_um, futures_cm = [], [], []
+    for symbol, data in exchange.markets.items():
+        if data['active']:
+            id = data['id']
+            symbol = data['symbol']
+            typ = data['type']
+            if typ == 'spot':
+                spot.append(id)
+            elif typ == 'swap':
+                if data['subType'] == 'linear':
+                    futures_um.append(id)
+                elif data['subType'] == 'inverse':
+                    futures_cm.append(id)
+    if asset_type == 'spot':
+        return spot
+    elif asset_type == 'futures/um':
+        return futures_um
+    elif asset_type == 'futures/cm':
+        return futures_cm
     
     

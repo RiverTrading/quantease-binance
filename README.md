@@ -6,6 +6,19 @@ This project provides a Python API for fetching historical data from the Binance
 
 To use the functions in `binance_history`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here are some examples:
 
+#### Fetch all the symbols
+
+To fetch all symbols from the Binance exchange, you can use the `fetch_all_symbols` function. Here's an example of how to use it:
+
+```python
+import binance_history as bh
+
+symbols = bh.fetch_all_symbols()
+print(symbols)
+```
+
+This will return a list of symbols based on the specified `asset_type`. By default, the `asset_type` is set to "spot". If you want to fetch symbols for perp futures contracts, you can specify the `asset_type` as "futures/um" for linear contracts or "futures/cm" for inverse contracts.
+
 #### Fetch Aggregated Trades Data
 
 ```python
