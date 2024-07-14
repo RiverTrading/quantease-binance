@@ -4,7 +4,7 @@ import pandas as pd
 import pendulum
 from pandas import DataFrame
 
-from .utils import gen_dates, get_data, unify_datetime, get_data_async, gen_dates_v2
+from .utils import gen_dates, get_data, unify_datetime, get_data_async
 from typing import Optional, Union, List
 import asyncio
 import uvloop
@@ -160,7 +160,7 @@ def fetch_data(
 
     symbol = symbol.upper().replace("/", "")
 
-    months, days = gen_dates_v2(
+    months, days = gen_dates(
         data_type,
         asset_type,
         symbol,

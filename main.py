@@ -20,15 +20,15 @@ import binance_history as bh
 
 # print(book_ticker)
 
-funding_rate = bh.fetch_funding_rate(
-    symbol = 'ETHUSDT',
-    start = '2017-01-01',
-    end = '2024-07-01',
-    asset_type = 'futures/um',
-    tz = 'UTC'
-)
+# funding_rate = bh.fetch_funding_rate(
+#     symbol = 'ETHUSDT',
+#     start = '2019-01-01',
+#     end = '2024-07-01',
+#     asset_type = 'futures/um',
+#     tz = 'UTC'
+# )
 
-print(funding_rate)
+# print(funding_rate)
 
 # trade = bh.fetch_trades(
 #     symbol = 'ETHUSDT',
