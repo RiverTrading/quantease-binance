@@ -207,6 +207,17 @@ Parameters:
 Returns:
 - `DataFrame`: A pandas dataframe with the requested data.
 
+#### `fetch_all_symbols`
+
+Function to fetch all symbols from the Binance exchange.
+
+Parameters:
+- `exchange` (object): The exchange object initialized with ccxt library. Default is `config.EXCHANGE`.
+- `asset_type` (str, optional): The asset type for which symbols are fetched. Must be one of "spot", "futures/um", "futures/cm". Default is "spot".
+
+Returns:
+- `List[str]`: A list of symbol IDs based on the specified `asset_type`.
+
 ### Note
 
 The functions in this API require the `binance_history.utils` module and the `gen_dates`, `get_data`, `unify_datetime`, and `get_data_async` functions from it. Make sure to import them as well.
