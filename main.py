@@ -22,7 +22,7 @@ import binance_history as bh
 
 # funding_rate = bh.fetch_funding_rate(
 #     symbol = 'BTCUSDT',
-#     start = '2024-01-01',
+#     start = '2020-01-01',
 #     end = '2024-07-01',
 #     asset_type = 'futures/um',
 #     tz = 'UTC'
@@ -33,28 +33,28 @@ import binance_history as bh
 # trade = bh.fetch_trades(
 #     symbol = 'ETHUSDT',
 #     start = '2024-05-01',
-#     end = '2024-07-01',
+#     end = '2024-07-10',
 #     asset_type = 'spot',
 #     tz = 'UTC'
 # )
 
 # print(trade)
 
-# klines = bh.fetch_klines(
-#     symbol='ETHUSDT',
-#     start='2018-01-01',
-#     end='2024-07-12',
-#     timeframe='1m',
-#     asset_type='spot',
-#     tz='UTC'
-# )
-# print(klines)
-
-metrics = bh.fetch_metrics(
-    symbol = 'BTCUSDT',
-    start = '2024-01-01',
-    end = '2024-04-01',
-    asset_type = 'futures/um',
+klines = bh.fetch_klines(
+    symbol='BTCUSDT',
+    start='2018-01-01',
+    end='2024-07-12',
+    timeframe='1m',
+    asset_type='spot',
     tz='UTC'
 )
-print(metrics)
+print(klines)
+
+# metrics = bh.fetch_metrics(
+#     symbol = 'BTCUSDT',
+#     start = '2024-01-01',
+#     end = '2024-04-01',
+#     asset_type = 'futures/um',
+#     tz='UTC'
+# )
+# print(metrics)

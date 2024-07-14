@@ -151,24 +151,28 @@ def gen_dates(
     #     ).to_list()
     # else:
     #     days = []
-    days = []
-    last_month_url = gen_data_url(
-        data_type, asset_type, "monthly", symbol, months[-1], timeframe=timeframe
-    )
-    if not exists_month(last_month_url):
-        while len(months) > 0:
-            month = months.pop()
-            month_url = gen_data_url(
-                data_type, asset_type, "monthly", symbol, month, timeframe=timeframe
-            )
-            if not exists_month(month_url):
-                start_year = month.year
-                start_month = month.month
+    while months:
+        month = months[-1]
+        month_url = gen_data_url(
+            data_type, asset_type, "monthly", symbol, month, timeframe=timeframe
+        )
+        
+        if exists_month(month_url):
+            break
+        
+        months.pop()
+        start_year = month.year
+        start_month = month.month
+    
+    if start_year and start_month:
         days = pd.date_range(
             Timestamp(start_year, start_month, 1),
             end,
             freq="D",
         ).to_list()
+    else:
+        days = []
+    
     return months, days
 
 
