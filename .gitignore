@@ -1,0 +1,14 @@
+.idea/
+.vscode/
+__pycache__/
+dist/
+
+.DS_Store
+
+.coverage
+.coverage.*
+coverage.xml
+
+docs/build
+
+t/
