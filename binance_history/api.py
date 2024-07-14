@@ -4,7 +4,7 @@ import pandas as pd
 import pendulum
 from pandas import DataFrame
 
-from .utils import gen_dates, get_data, unify_datetime, get_data_async
+from .utils import gen_dates, get_data, unify_datetime, get_data_async, gen_dates_v2
 from typing import Optional, Union, List
 import asyncio
 import uvloop
@@ -160,7 +160,7 @@ def fetch_data(
 
     symbol = symbol.upper().replace("/", "")
 
-    months, days = gen_dates(
+    months, days = gen_dates_v2(
         data_type,
         asset_type,
         symbol,
@@ -181,15 +181,13 @@ def fetch_data(
     #     daily_dfs = []
     # df = pd.concat(monthly_dfs + daily_dfs)
     uvloop.install()
-    df = asyncio.run(gather(symbol, asset_type, data_type, start, end, tz, timeframe, months, days))
+    df = asyncio.run(gather(symbol, asset_type, data_type, tz, timeframe, months, days))
     return df.loc[start:end]
 
 async def gather(
     symbol: str,
     asset_type: str,
     data_type: str,
-    start: datetime,
-    end: datetime,
     tz: Optional[str] = None,
     timeframe: Optional[str] = None,
     months: List[datetime] = [],
@@ -205,7 +203,7 @@ async def gather(
             for dt in days
         ]
     else:
-        daily_dfs = days
+        daily_dfs = []
     dfs = await tqdm.gather(*monthly_dfs, *daily_dfs)
     df = pd.concat(dfs)
     return df
