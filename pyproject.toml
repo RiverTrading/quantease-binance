@@ -3,7 +3,7 @@ name = "quantease-binance-history"
 version = "0.1.0"
 description = "fetch binance data easily"
 authors = ["river <nachuan.shi.quant@gmail.com>"]
-license = "\"MIT\""
+license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
