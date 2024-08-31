@@ -12,4 +12,5 @@ coverage.xml
 
 docs/build
 
-t/
+spot/
+linear/

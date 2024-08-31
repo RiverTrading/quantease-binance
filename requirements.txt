@@ -9,3 +9,4 @@ pendulum==3.0.0
 pytest==8.2.2
 tqdm==4.66.4
 uvloop==0.19.0
+tardis-dev==2.0.0a13

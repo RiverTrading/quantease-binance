@@ -1,17 +1,23 @@
 from datetime import datetime
 
+
 import pandas as pd
 import pendulum
 from pandas import DataFrame
 
+
+
+from .utils import Symbol
 from .utils import gen_dates, get_data, unify_datetime, get_data_async
 from . import config
 from typing import Optional, Union, List, Literal
 import asyncio
-import uvloop
+import platform
+#import uvloop
 
 from tqdm import tqdm
 from tqdm.asyncio import tqdm 
+from tardis_dev import get_exchange_details
 
 
 def fetch_klines(
@@ -127,12 +133,13 @@ def fetch_metrics(
 def fetch_data(
     symbol: str,
     asset_type: Literal["spot", "futures/um", "futures/cm"],
-    data_type: str,
+    data_type: Literal["klines", "aggTrades", "bookTicker", "fundingRate", "trades", "metrics"],
     start: datetime,
     end: datetime,
     tz: Optional[str] = "UTC",
     timeframe: Optional[str] = None,
-    use_async: bool = False,
+    use_async: Optional[bool] = False,
+    save_local: Optional[bool] = False,
 ) -> DataFrame:
     """
     :param symbol: The binance market pair name. e.g. ``'BTCUSDT'``.
@@ -172,22 +179,26 @@ def fetch_data(
         timeframe=timeframe,
     )
     if use_async:
-        uvloop.install()
-        df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days))
+        if platform.system() == "linux":
+            import uvloop
+            uvloop.install()
+
+        #uvloop.install()
+        df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days, save_local))
     else:
         monthly_dfs = [
-            get_data(data_type, asset_type, "monthly", symbol, dt, tz, timeframe)
+            get_data(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local)
             for dt in tqdm(months, desc="Downloading data", unit="month")
         ]
         if data_type != "fundingRate":
             daily_dfs = [
-                get_data(data_type, asset_type, "daily", symbol, dt, tz, timeframe)
+                get_data(data_type, asset_type, "daily", symbol, dt, tz, timeframe, save_local)
                 for dt in tqdm(days, desc="Downloading data", unit="day")
             ]
         else:
             daily_dfs = []
         df = pd.concat(monthly_dfs + daily_dfs)
-    return df.loc[start:end]
+    return df[(start <= df.index) & (df.index < end)]
 
 async def _gather(
     symbol: str,
@@ -197,14 +208,15 @@ async def _gather(
     timeframe: Optional[str] = None,
     months: List[datetime] = [],
     days: List[datetime] = [],
+    save_local: Optional[bool] = False,
 ):
     monthly_dfs = [
-        get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe)
+        get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local)
         for dt in months
     ]
     if data_type != "fundingRate":
         daily_dfs = [
-            get_data_async(data_type, asset_type, "daily", symbol, dt, tz, timeframe)
+            get_data_async(data_type, asset_type, "daily", symbol, dt, tz, timeframe, save_local)
             for dt in days
         ]
     else:
@@ -213,26 +225,49 @@ async def _gather(
     df = pd.concat(dfs)
     return df
 
-def fetch_all_symbols(exchange = config.EXCHANGE, asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot") -> List[str]:
-    exchange.load_markets()
-    spot, futures_um, futures_cm = [], [], []
-    for symbol, data in exchange.markets.items():
-        if data['active']:
-            id = data['id']
-            symbol = data['symbol']
-            typ = data['type']
-            if typ == 'spot':
-                spot.append(id)
-            elif typ == 'swap':
-                if data['subType'] == 'linear':
-                    futures_um.append(id)
-                elif data['subType'] == 'inverse':
-                    futures_cm.append(id)
-    if asset_type == 'spot':
-        return spot
-    elif asset_type == 'futures/um':
-        return futures_um
-    elif asset_type == 'futures/cm':
-        return futures_cm
+def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot"):
+    
+    exchange_map = {
+        "spot": "binance",
+        "futures/um": "binance-futures",
+        "futures/cm": "binance-delivery",
+        
+    }
+    
+    info = {}
+    
+    res = get_exchange_details(exchange = exchange_map[asset_type])
+    symbols = res['datasets']['symbols']
+    
+    for s in symbols:
+        info[s['id']] = Symbol(
+            id = s['id'],
+            type = s['type'],
+            availableSince=pd.to_datetime(s['availableSince'], utc=True),
+            availableTo=pd.to_datetime(s['availableTo'], utc=True),
+        )
+    
+    return info
+    
+    # exchange.load_markets()
+    # spot, futures_um, futures_cm = [], [], []
+    # for symbol, data in exchange.markets.items():
+    #     if data['active']:
+    #         id = data['id']
+    #         symbol = data['symbol']
+    #         typ = data['type']
+    #         if typ == 'spot':
+    #             spot.append({'id': id, 'symbol': symbol, 'asset_type': "spot"})
+    #         elif typ == 'swap':
+    #             if data['subType'] == 'linear':
+    #                 futures_um.append({'id': id, 'symbol': symbol, 'asset_type': "futures/um"})
+    #             elif data['subType'] == 'inverse':
+    #                 futures_cm.append({'id': id, 'symbol': symbol, 'asset_type': "futures/cm"})
+    # if asset_type == 'spot':
+    #     return spot
+    # elif asset_type == 'futures/um':
+    #     return futures_um
+    # elif asset_type == 'futures/cm':
+    #     return futures_cm
     
     

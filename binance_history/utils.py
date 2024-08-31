@@ -8,6 +8,7 @@ import warnings
 from pathlib import Path
 from typing import Optional, Union
 from urllib.parse import urlparse
+from dataclasses import dataclass
 
 import httpx
 import aiohttp
@@ -18,6 +19,13 @@ from pandas import Timestamp, DataFrame
 from . import config
 from .exceptions import NetworkError, DataNotFound
 
+
+@dataclass
+class Symbol:
+    id: str
+    type: str
+    availableSince: pd.DatetimeIndex
+    availableTo: pd.DatetimeIndex
 
 def gen_data_url(
     data_type: str,
@@ -167,11 +175,13 @@ def gen_dates(
         start_year = month.year
         start_month = month.month
     
-    if start_year and start_month:
+    st = Timestamp(start_year, start_month, 1)
+    if start_year and start_month and st != end:
         days = pd.date_range(
-            Timestamp(start_year, start_month, 1),
+            st,
             end,
             freq="D",
+            inclusive="left",
         ).to_list()
     else:
         days = []
@@ -199,6 +209,7 @@ def get_data(
     dt: Timestamp,
     data_tz: str,
     timeframe: Optional[str] = None,
+    save_local: bool = False,
 ) -> DataFrame:
     if data_type == "klines":
         assert timeframe is not None
@@ -207,8 +218,13 @@ def get_data(
 
     df = load_data_from_disk(url)
     if df is None:
-        df = download_data(data_type, data_tz, url)
-        save_data_to_disk(url, df)
+        try:
+            df = download_data(data_type, data_tz, url)
+            save_data_to_disk(url, df, save_local)
+        except DataNotFound:
+            warn = f"Data not found: {url}"
+            warnings.warn(warn)
+            return None
     return df
 
 async def get_data_async(
@@ -219,6 +235,7 @@ async def get_data_async(
     dt: Timestamp,
     data_tz: str,
     timeframe: Optional[str] = None,
+    save_local: bool = False,
 ) -> DataFrame:
     if data_type == "klines":
         assert timeframe is not None
@@ -227,8 +244,13 @@ async def get_data_async(
 
     df = load_data_from_disk(url)
     if df is None:
-        df = await download_data_async(data_type, data_tz, url)
-        save_data_to_disk(url, df)
+        try:
+            df = await download_data_async(data_type, data_tz, url)
+            save_data_to_disk(url, df, save_local)
+        except DataNotFound:
+            warn = f"Data not found: {url}"
+            warnings.warn(warn)
+            return None
     return df
 
 
@@ -306,7 +328,7 @@ def load_klines(data_tz: str, content: bytes) -> DataFrame:
         with zipf.open(csv_name, "r") as csvfile:
             df = pd.read_csv(
                 csvfile,
-                usecols=range(11),
+                usecols=range(12),
                 header=0,
                 names=[
                     "open_time",
@@ -418,11 +440,12 @@ def get_local_data_path(url: str) -> Path:
     return config.CACHE_DIR / path[1:]
 
 
-def save_data_to_disk(url: str, df: DataFrame) -> None:
+def save_data_to_disk(url: str, df: DataFrame, save_local: bool = False) -> None:
     path = get_local_data_path(url)
     path.parent.mkdir(parents=True, exist_ok=True)
     # df.to_pickle(path)
-    df.to_parquet(path)
+    if save_local:
+        df.to_parquet(path)
 
 
 def load_data_from_disk(url: str) -> Union[DataFrame, None]:
