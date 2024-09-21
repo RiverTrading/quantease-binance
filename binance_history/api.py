@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import Dict
 
 import pandas as pd
 import pendulum
@@ -225,7 +225,7 @@ async def _gather(
     df = pd.concat(dfs)
     return df
 
-def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot"):
+def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot") -> Dict[str, Symbol]:
     
     exchange_map = {
         "spot": "binance",
@@ -240,12 +240,13 @@ def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = 
     symbols = res['datasets']['symbols']
     
     for s in symbols:
-        info[s['id']] = Symbol(
-            id = s['id'],
-            type = s['type'],
-            availableSince=pd.to_datetime(s['availableSince'], utc=True),
-            availableTo=pd.to_datetime(s['availableTo'], utc=True),
-        )
+        if s["id"] not in ["FUTURES", "PERPETUAL", "SPOT"]:
+            info[s['id']] = Symbol(
+                id = s['id'],
+                type = s['type'],
+                availableSince=pd.to_datetime(s['availableSince'], utc=True),
+                availableTo=pd.to_datetime(s['availableTo'], utc=True),
+            )
     
     return info
     
