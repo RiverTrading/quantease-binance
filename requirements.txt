@@ -1,0 +1,10 @@
+aiohttp==3.10.6
+coverage==7.6.1
+httpx==0.27.2
+pandas==2.2.3
+pendulum==3.0.0
+pytest==8.3.3
+python_dateutil==2.9.0.post0
+tardis_dev==2.0.0a13
+tqdm==4.66.5
+uvloop==0.20.0

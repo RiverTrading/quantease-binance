@@ -7,7 +7,7 @@ from dateutil import tz
 
 
 from .utils import Symbol
-from .utils import gen_dates, get_data, unify_datetime, get_data_async
+from .utils import gen_dates, get_data, get_data_async, unify_datetime
 from . import config
 from typing import Optional, Union, List, Literal
 import asyncio

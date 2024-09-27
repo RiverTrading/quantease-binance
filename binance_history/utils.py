@@ -9,11 +9,12 @@ from pathlib import Path
 from typing import Optional, Union
 from urllib.parse import urlparse
 from dataclasses import dataclass
+from dateutil import parser
 
 import httpx
 import aiohttp
 import pandas as pd
-import pendulum
+# import pendulum
 from pandas import Timestamp, DataFrame
 
 from . import config
@@ -95,13 +96,21 @@ def gen_data_url(
     return url
 
 
+# def unify_datetime(input: Union[str, datetime.datetime]) -> datetime.datetime:
+#     if isinstance(input, str):
+#         return pendulum.parse(input, strict=False).replace(tzinfo=None)
+#     elif isinstance(input, datetime.datetime):
+#         return input.replace(tzinfo=None)
+#     else:
+#         raise TypeError(input)
+
 def unify_datetime(input: Union[str, datetime.datetime]) -> datetime.datetime:
     if isinstance(input, str):
-        return pendulum.parse(input, strict=False).replace(tzinfo=None)
+        return parser.parse(input, fuzzy=True).replace(tzinfo=None)
     elif isinstance(input, datetime.datetime):
         return input.replace(tzinfo=None)
     else:
-        raise TypeError(input)
+        raise TypeError(f"Unsupported input type: {type(input)}")
 
 
 def exists_month(month_url):
