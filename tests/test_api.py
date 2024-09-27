@@ -3,7 +3,7 @@ import datetime
 import pytest
 from pandas import Timestamp, Timedelta
 
-from binance_history import fetch_klines, fetch_agg_trades
+from quantease_binance import fetch_klines, fetch_agg_trades
 
 
 @pytest.mark.parametrize(
