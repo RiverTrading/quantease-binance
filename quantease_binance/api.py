@@ -239,7 +239,7 @@ def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = 
     symbols = res['datasets']['symbols']
     
     for s in symbols:
-        if s["id"] not in ["FUTURES", "PERPETUAL", "SPOT"]:
+        if s["id"] not in ["FUTURES", "PERPETUALS", "SPOT"]:
             info[s['id']] = Symbol(
                 id = s['id'],
                 type = s['type'],

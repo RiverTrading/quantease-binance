@@ -1,7 +1,7 @@
 import pytest
 from pandas import Timestamp, Timedelta
 
-from binance_history.utils import gen_data_url, gen_dates
+from quantease_binance.utils import gen_data_url, gen_dates
 
 
 def test_gen_data_url():
