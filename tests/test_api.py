@@ -1,6 +1,5 @@
 import datetime
 
-import pendulum
 import pytest
 from pandas import Timestamp, Timedelta
 
@@ -20,8 +19,8 @@ from binance_history import fetch_klines, fetch_agg_trades
     [
         ("2022-1-2", "2022-1-20", "Asia/Shanghai"),
         (
-            pendulum.datetime(2022, 1, 2, tz="Europe/Paris"),
-            pendulum.datetime(2022, 1, 20, tz="Europe/Paris"),
+            Timestamp("2022-01-02", tz="Europe/Paris"),
+            Timestamp("2022-01-20", tz="Europe/Paris"),
             "Asia/Shanghai",
         ),
         (

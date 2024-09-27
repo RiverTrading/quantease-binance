@@ -1,13 +1,12 @@
-import binance_history as bh
-import os
+import quantease_binance as qb
 
 
 
 def main():
-    symbols = bh.fetch_all_symbols(asset_type = "futures/cm")
+    symbols = qb.fetch_all_symbols(asset_type = "futures/cm")
     for s, i in symbols.items():
         if i.type == "future":
-            bh.fetch_data(
+            qb.fetch_data(
                 symbol = s,
                 data_type="klines",
                 asset_type="futures/cm",
