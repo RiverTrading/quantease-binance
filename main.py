@@ -1,5 +1,4 @@
 import binance_history as bh
-import ccxt 
 import os
 
 

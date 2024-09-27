@@ -2,9 +2,8 @@ from datetime import datetime
 from typing import Dict
 
 import pandas as pd
-import pendulum
 from pandas import DataFrame
-
+from dateutil import tz
 
 
 from .utils import Symbol
@@ -162,7 +161,7 @@ def fetch_data(
         if it is None, your local timezone will be used.
     """
     if tz is None:
-        tz = pendulum.local_timezone().name
+        tz = tz.tzlocal().tzname(None)
 
     start, end = unify_datetime(start), unify_datetime(end)
 
