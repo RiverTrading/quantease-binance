@@ -4,16 +4,16 @@ This project provides a Python API for fetching historical data from the Binance
 
 ### Usage
 
-To use the functions in `binance_history`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here are some examples:
+To use the functions in `quantease_binance`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here are some examples:
 
 #### Fetch all the symbols
 
 To fetch all symbols from the Binance exchange, you can use the `fetch_all_symbols` function. Here's an example of how to use it:
 
 ```python
-import binance_history as bh
+import quantease_binance as qb
 
-symbols = bh.fetch_all_symbols()
+symbols = qb.fetch_all_symbols()
 print(symbols)
 ```
 
@@ -22,9 +22,9 @@ This will return a list of symbols based on the specified `asset_type`. By defau
 #### Fetch Aggregated Trades Data
 
 ```python
-import binace_history as bh
+import binace_history as qb
 
-agg_trades = bh.fetch_agg_trades(
+agg_trades = qb.fetch_agg_trades(
     symbol='BTCUSDT',
     start='2024-01-01',
     end='2024-05-01',
@@ -37,7 +37,7 @@ print(agg_trades)
 #### Fetch Book Ticker Data
 
 ```python
-book_ticker = bh.fetch_book_ticker(
+book_ticker = qb.fetch_book_ticker(
     symbol='AAVEUSD_PERP',
     start='2024-01-01',
     end='2024-02-01',
@@ -50,7 +50,7 @@ print(book_ticker)
 #### Fetch Funding Rate Data
 
 ```python
-funding_rate = bh.fetch_funding_rate(
+funding_rate = qb.fetch_funding_rate(
     symbol='ETHUSDT',
     start='2019-01-01',
     end='2024-07-01',
@@ -63,7 +63,7 @@ print(funding_rate)
 #### Fetch Trades Data
 
 ```python
-trade = bh.fetch_trades(
+trade = qb.fetch_trades(
     symbol='ETHUSDT',
     start='2024-05-01',
     end='2024-07-10',
@@ -76,7 +76,7 @@ print(trade)
 #### Fetch Klines Data
 
 ```python
-klines = bh.fetch_klines(
+klines = qb.fetch_klines(
     symbol='BTCUSDT',
     start='2018-01-01',
     end='2024-07-12',
@@ -90,7 +90,7 @@ print(klines)
 #### Fetch Metrics Data
 
 ```python
-metrics = bh.fetch_metrics(
+metrics = qb.fetch_metrics(
     symbol='BTCUSDT',
     start='2024-01-01',
     end='2024-04-01',
@@ -220,4 +220,4 @@ Returns:
 
 ### Note
 
-The functions in this API require the `binance_history.utils` module and the `gen_dates`, `get_data`, `unify_datetime`, and `get_data_async` functions from it. Make sure to import them as well.
+The functions in this API require the `quantease_binance.utils` module and the `gen_dates`, `get_data`, `unify_datetime`, and `get_data_async` functions from it. Make sure to import them as well.
