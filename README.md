@@ -6,6 +6,8 @@ This project provides a Python API for fetching historical data from the Binance
 
 ## Quick Start Guide
 
+[View Full Documentation](https://quantease-binance-history.readthedocs.io/en/latest/api.html#fetch-all-symbols)  
+
 To use the functions in `quantease_binance`, you need to import the necessary modules and call the desired functions with appropriate parameters. Here are some examples:
 
 ### Install Dependencies
