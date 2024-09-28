@@ -1,0 +1,38 @@
+version: 2
+
+# Build documentation in the docs/ directory with Sphinx
+sphinx:
+  configuration: docs/conf.py
+
+# Optionally build your docs in additional formats such as PDF and ePub
+formats:
+  - pdf
+  - epub
+
+# Build the documentation
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.12"
+
+# Include a quick start guide and API documentation
+sphinx:
+  configuration: docs/conf.py
+  builder: html
+  fail_on_warning: true
+
+# Custom steps to run before building the documentation
+pre_build:
+  - mkdir -p docs
+  - echo "Welcome to the quantease-binance documentation!" > docs/index.rst
+  - echo "==============================" >> docs/index.rst
+  - echo "Quick Start" >> docs/index.rst
+  - echo "==============================" >> docs/index.rst
+  - echo ".. include:: ../README.md" >> docs/index.rst
+  - echo "" >> docs/index.rst
+  - echo "API Documentation" >> docs/index.rst
+  - echo "==============================" >> docs/index.rst
+  - echo ".. automodule:: quantease_binance" >> docs/index.rst
+  - echo "   :members:" >> docs/index.rst
+  - echo "   :undoc-members:" >> docs/index.rst
+  - echo "   :show-inheritance:" >> docs/index.rst
