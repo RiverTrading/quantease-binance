@@ -1,49 +1,42 @@
 version: 2
 
-# Build documentation in the docs/ directory with Sphinx
 sphinx:
   configuration: docs/conf.py
 
-# Optionally build your docs in additional formats such as PDF and ePub
 formats:
+  - htmlzip
   - pdf
   - epub
 
-# Build the documentation
-build:
-  os: ubuntu-22.04
-  tools:
-    python: "3.10"
-
-# Include a quick start guide and API documentation
-sphinx:
-  configuration: docs/conf.py
-  builder: html
-  fail_on_warning: true
-
-# Custom steps to run before building the documentation
 python:
   install:
     - requirements: docs/requirements.txt
   system_packages: true
 
-# Content of the index.rst file
 python:
   - |
     import os
+    
+    # 创建 docs 目录（如果不存在）
     os.makedirs('docs', exist_ok=True)
+    
+    # 创建 index.rst 文件
     with open('docs/index.rst', 'w') as f:
         f.write("""
-    Welcome to the quantease-binance documentation!
-    ==============================
-    Quick Start
-    ==============================
-    .. include:: ../README.md
+    欢迎来到文档
+    ============
 
-    API Documentation
-    ==============================
-    .. automodule:: quantease_binance
-       :members:
-       :undoc-members:
-       :show-inheritance:
+    .. include:: ../README.md
+        :parser: myst_parser.sphinx_
+    """)
+    
+    # 创建 conf.py 文件
+    with open('docs/conf.py', 'w') as f:
+        f.write("""
+    extensions = ['myst_parser']
+    source_suffix = {
+        '.rst': 'restructuredtext',
+        '.md': 'markdown',
+    }
+    master_doc = 'index'
     """)
