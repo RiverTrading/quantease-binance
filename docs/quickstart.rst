@@ -25,7 +25,24 @@ To fetch all trading pairs from the Binance exchange, you can use the ``fetch_al
    symbols = qb.fetch_all_symbols()
    print(symbols)
 
-This will return a list of trading pairs based on the specified ``asset_type``. By default, ``asset_type`` is set to "spot". If you want to get trading pairs for perpetual contracts, specify ``asset_type`` as "futures/um" or "futures/cm".
+This will return a list of trading pairs based on the specified ``asset_type``. By default, ``asset_type`` is set to "spot". If you want to get trading pairs for perpetual contracts, specify ``asset_type`` as "futures/um" or "futures/cm". The return type is `Dict[str, Symbol]` where the key is the trading pair and the value is an instance of the `Symbol` class.
+
+Fetch Data
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+   data = qb.fetch_data(
+       symbol = s,
+       data_type="klines",
+       asset_type="futures/cm",
+       start=i.availableSince,
+       end=i.availableTo,
+       timeframe="1m",
+       use_async=True,
+       save_local=True,
+   )
+    
 
 Fetch Aggregate Trade Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

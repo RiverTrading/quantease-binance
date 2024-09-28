@@ -106,6 +106,8 @@ fetch_data
    :param datetime end: End time for the data request.
    :param str tz: Timezone for the returned DataFrame's datetime parameters. Default is "UTC".
    :param str timeframe: Kline interval. Default is None.
+   :param bool use_async: Whether to use asynchronous requests. Default is False. It would increase the speed of the data fetching process but may cause issues with the Binance API rate limits.
+   :param bool save_local: Whether to save the fetched data locally. Default is False. The data will be saved in the ``.cache`` directory.
    :return: A pandas DataFrame containing the requested data.
    :rtype: DataFrame
 
