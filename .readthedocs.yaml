@@ -13,7 +13,7 @@ formats:
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.12"
+    python: "3.10"
 
 # Include a quick start guide and API documentation
 sphinx:
@@ -22,17 +22,28 @@ sphinx:
   fail_on_warning: true
 
 # Custom steps to run before building the documentation
-pre_build:
-  - mkdir -p docs
-  - echo "Welcome to the quantease-binance documentation!" > docs/index.rst
-  - echo "==============================" >> docs/index.rst
-  - echo "Quick Start" >> docs/index.rst
-  - echo "==============================" >> docs/index.rst
-  - echo ".. include:: ../README.md" >> docs/index.rst
-  - echo "" >> docs/index.rst
-  - echo "API Documentation" >> docs/index.rst
-  - echo "==============================" >> docs/index.rst
-  - echo ".. automodule:: quantease_binance" >> docs/index.rst
-  - echo "   :members:" >> docs/index.rst
-  - echo "   :undoc-members:" >> docs/index.rst
-  - echo "   :show-inheritance:" >> docs/index.rst
+python:
+  install:
+    - requirements: docs/requirements.txt
+  system_packages: true
+
+# Content of the index.rst file
+python:
+  - |
+    import os
+    os.makedirs('docs', exist_ok=True)
+    with open('docs/index.rst', 'w') as f:
+        f.write("""
+    Welcome to the quantease-binance documentation!
+    ==============================
+    Quick Start
+    ==============================
+    .. include:: ../README.md
+
+    API Documentation
+    ==============================
+    .. automodule:: quantease_binance
+       :members:
+       :undoc-members:
+       :show-inheritance:
+    """)
