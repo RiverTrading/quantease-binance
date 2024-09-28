@@ -1,14 +1,24 @@
+# Project Documentation
+
 ## Project Description
 
-This project provides a Python API for fetching historical data from the Binance exchange. It includes functions for fetching klines, trades, aggregated trades, book ticker data, funding rates, and metrics.
+This project provides a Python API for fetching historical data from the Binance exchange. It includes functionalities for retrieving Klines, trades, aggregate trades, book ticker data, funding rates, and metrics.
 
-### Usage
+## Quick Start Guide
 
-To use the functions in `quantease_binance`, you need to import the necessary modules and call the desired function with the appropriate parameters. Here are some examples:
+To use the functions in `quantease_binance`, you need to import the necessary modules and call the desired functions with appropriate parameters. Here are some examples:
 
-#### Fetch all the symbols
+### Install Dependencies
 
-To fetch all symbols from the Binance exchange, you can use the `fetch_all_symbols` function. Here's an example of how to use it:
+Make sure to install the required dependencies before running the code:
+
+```bash
+pip install pandas pendulum asyncio uvloop tqdm
+```
+
+### Fetch All Trading Pairs
+
+To fetch all trading pairs from the Binance exchange, you can use the `fetch_all_symbols` function. Here’s how to use it:
 
 ```python
 import quantease_binance as qb
@@ -17,12 +27,12 @@ symbols = qb.fetch_all_symbols()
 print(symbols)
 ```
 
-This will return a list of symbols based on the specified `asset_type`. By default, the `asset_type` is set to "spot". If you want to fetch symbols for perp futures contracts, you can specify the `asset_type` as "futures/um" for linear contracts or "futures/cm" for inverse contracts.
+This will return a list of trading pairs based on the specified `asset_type`. By default, `asset_type` is set to "spot". If you want to get trading pairs for perpetual contracts, specify `asset_type` as "futures/um" or "futures/cm".
 
-#### Fetch Aggregated Trades Data
+### Fetch Aggregate Trade Data
 
 ```python
-import binace_history as qb
+import quantease_binance as qb
 
 agg_trades = qb.fetch_agg_trades(
     symbol='BTCUSDT',
@@ -34,7 +44,7 @@ agg_trades = qb.fetch_agg_trades(
 print(agg_trades)
 ```
 
-#### Fetch Book Ticker Data
+### Fetch Book Ticker Data
 
 ```python
 book_ticker = qb.fetch_book_ticker(
@@ -47,7 +57,7 @@ book_ticker = qb.fetch_book_ticker(
 print(book_ticker)
 ```
 
-#### Fetch Funding Rate Data
+### Fetch Funding Rate Data
 
 ```python
 funding_rate = qb.fetch_funding_rate(
@@ -60,7 +70,7 @@ funding_rate = qb.fetch_funding_rate(
 print(funding_rate)
 ```
 
-#### Fetch Trades Data
+### Fetch Trade Data
 
 ```python
 trade = qb.fetch_trades(
@@ -73,7 +83,7 @@ trade = qb.fetch_trades(
 print(trade)
 ```
 
-#### Fetch Klines Data
+### Fetch Kline Data
 
 ```python
 klines = qb.fetch_klines(
@@ -87,7 +97,7 @@ klines = qb.fetch_klines(
 print(klines)
 ```
 
-#### Fetch Metrics Data
+### Fetch Metrics Data
 
 ```python
 metrics = qb.fetch_metrics(
@@ -100,124 +110,138 @@ metrics = qb.fetch_metrics(
 print(metrics)
 ```
 
-Make sure to replace the placeholders with the actual values for `symbol`, `start`, `end`, and other parameters as needed.
+Make sure to replace the placeholders for `symbol`, `start`, `end`, and other parameters as needed.
 
-Make sure you have the required dependencies installed (`pandas`, `pendulum`, `asyncio`, `uvloop`, `tqdm`) before running the code.
+## API Documentation
 
-### Function Documentation
+### `fetch_klines`
 
-#### `fetch_klines`
+Convenience function to fetch Kline data.
 
-Convenience function for fetching klines data.
+**Parameters:**
 
-Parameters:
-- `symbol` (str): The Binance market pair name, e.g., "BTCUSDT".
-- `start` (str or datetime): The start datetime of the requested data.
-- `end` (str or datetime): The end datetime of the requested data.
-- `timeframe` (str, optional): The kline interval. Default is "1m".
-- `asset_type` (str, optional): The asset type of the requested data. Default is "spot".
-- `tz` (str, optional): Timezone of the datetime parameters and the returned dataframe. Default is None.
+- `symbol` (str): Binance market pair name, e.g., "BTCUSDT".
+- `start` (str or datetime): Start time for the data request.
+- `end` (str or datetime): End time for the data request.
+- `timeframe` (str, optional): Kline interval. Default is "1m".
+- `asset_type` (str, optional): Asset type for the data request. Default is "spot".
+- `tz` (str, optional): Timezone for the returned DataFrame's datetime parameters. Default is None.
 
-Returns:
-- `DataFrame`: A pandas dataframe with columns `open`, `high`, `low`, `close`, `volume`, `trades`, `close_datetime`.
+**Returns:**
 
-#### `fetch_trades`
+- `DataFrame`: A pandas DataFrame containing `open`, `high`, `low`, `close`, `volume`, `trades`, `close_datetime` columns.
 
-Convenience function for fetching trades data.
+### `fetch_trades`
 
-Parameters:
-- `symbol` (str): The Binance market pair name, e.g., "BTCUSDT".
-- `start` (str or datetime): The start datetime of the requested data.
-- `end` (str or datetime): The end datetime of the requested data.
-- `asset_type` (str, optional): The asset type of the requested data. Default is "spot".
-- `tz` (str, optional): Timezone of the datetime parameters and the returned dataframe. Default is None.
+Convenience function to fetch trade data.
 
-Returns:
-- `DataFrame`: A pandas dataframe with columns `id`, `price`, `qty`, `quoteQty`, `time`, `isBuyerMaker`, `isBestMatch`.
+**Parameters:**
 
-#### `fetch_agg_trades`
+- `symbol` (str): Binance market pair name, e.g., "BTCUSDT".
+- `start` (str or datetime): Start time for the data request.
+- `end` (str or datetime): End time for the data request.
+- `asset_type` (str, optional): Asset type for the data request. Default is "spot".
+- `tz` (str, optional): Timezone for the returned DataFrame's datetime parameters. Default is None.
 
-Convenience function for fetching aggregated trades data.
+**Returns:**
 
-Parameters:
-- `symbol` (str): The Binance market pair name, e.g., "BTCUSDT".
-- `start` (str or datetime): The start datetime of the requested data.
-- `end` (str or datetime): The end datetime of the requested data.
-- `asset_type` (str, optional): The asset type of the requested data. Default is "spot".
-- `tz` (str, optional): Timezone of the datetime parameters and the returned dataframe. Default is None.
+- `DataFrame`: A pandas DataFrame containing `id`, `price`, `qty`, `quoteQty`, `time`, `isBuyerMaker`, `isBestMatch` columns.
 
-Returns:
-- `DataFrame`: A pandas dataframe with columns `id`, `price`, `qty`, `firstTradeId`, `lastTradeId`, `time`, `isBuyerMaker`, `isBestMatch`.
+### `fetch_agg_trades`
 
-#### `fetch_book_ticker`
+Convenience function to fetch aggregate trade data.
 
-Convenience function for fetching book ticker data.
+**Parameters:**
 
-Parameters:
-- `symbol` (str): The Binance market pair name, e.g., "BTCUSDT".
-- `start` (str or datetime): The start datetime of the requested data.
-- `end` (str or datetime): The end datetime of the requested data.
-- `asset_type` (str, optional): The asset type of the requested data. Default is "spot".
-- `tz` (str, optional): Timezone of the datetime parameters and the returned dataframe. Default is None.
+- `symbol` (str): Binance market pair name, e.g., "BTCUSDT".
+- `start` (str or datetime): Start time for the data request.
+- `end` (str or datetime): End time for the data request.
+- `asset_type` (str, optional): Asset type for the data request. Default is "spot".
+- `tz` (str, optional): Timezone for the returned DataFrame's datetime parameters. Default is None.
 
-Returns:
-- `DataFrame`: A pandas dataframe with columns `symbol`, `bidPrice`, `bidQty`, `askPrice`, `askQty`, `time`.
+**Returns:**
 
-#### `fetch_funding_rate`
+- `DataFrame`: A pandas DataFrame containing `id`, `price`, `qty`, `firstTradeId`, `lastTradeId`, `time`, `isBuyerMaker`, `isBestMatch` columns.
 
-Convenience function for fetching funding rate data.
+### `fetch_book_ticker`
 
-Parameters:
-- `symbol` (str): The Binance market pair name, e.g., "BTCUSDT".
-- `start` (str or datetime): The start datetime of the requested data.
-- `end` (str or datetime): The end datetime of the requested data.
-- `asset_type` (str): The asset type of the requested data. Must be one of "spot", "futures/um", "futures/cm".
-- `tz` (str, optional): Timezone of the datetime parameters and the returned dataframe. Default is None.
+Convenience function to fetch book ticker data.
 
-Returns:
-- `DataFrame`: A pandas dataframe with columns `symbol`, `fundingRate`, `fundingTime`.
+**Parameters:**
 
-#### `fetch_metrics`
+- `symbol` (str): Binance market pair name, e.g., "BTCUSDT".
+- `start` (str or datetime): Start time for the data request.
+- `end` (str or datetime): End time for the data request.
+- `asset_type` (str, optional): Asset type for the data request. Default is "spot".
+- `tz` (str, optional): Timezone for the returned DataFrame's datetime parameters. Default is None.
 
-Convenience function for fetching metrics data.
+**Returns:**
 
-Parameters:
-- `symbol` (str): The Binance market pair name, e.g., "BTCUSDT".
-- `start` (str or datetime): The start datetime of the requested data.
-- `end` (str or datetime): The end datetime of the requested data.
-- `asset_type` (str): The asset type of the requested data. Must be one of "spot", "futures/um", "futures/cm".
-- `tz` (str, optional): Timezone of the datetime parameters and the returned dataframe. Default is None.
+- `DataFrame`: A pandas DataFrame containing `symbol`, `bidPrice`, `bidQty`, `askPrice`, `askQty`, `time` columns.
 
-Returns:
-- `DataFrame`: A pandas dataframe with columns `symbol`, `openInterest`, `numberOfTrades`, `volume`, `quoteVolume`, `takerBuyBaseAssetVolume`, `takerBuyQuoteAssetVolume`, `openTime`, `closeTime`.
+### `fetch_funding_rate`
 
-#### `fetch_data`
+Convenience function to fetch funding rate data.
 
-Main function for fetching data.
+**Parameters:**
 
-Parameters:
-- `symbol` (str): The Binance market pair name, e.g., "BTCUSDT".
-- `asset_type` (str): The asset type of the requested data. Must be one of "spot", "futures/um", "futures/cm".
-- `data_type` (str): The type of requested data. Must be one of "klines", "aggTrades", "bookTicker", "fundingRate", "metrics".
-- `start` (datetime): The start datetime of the requested data.
-- `end` (datetime): The end datetime of the requested data.
-- `tz` (str, optional): Timezone of the datetime parameters and the returned dataframe. Default is "UTC".
-- `timeframe` (str, optional): The kline interval. Default is None.
+- `symbol` (str): Binance market pair name, e.g., "BTCUSDT".
+- `start` (str or datetime): Start time for the data request.
+- `end` (str or datetime): End time for the data request.
+- `asset_type` (str): Asset type for the data request. Must be one of "spot", "futures/um", or "futures/cm".
+- `tz` (str, optional): Timezone for the returned DataFrame's datetime parameters. Default is None.
 
-Returns:
-- `DataFrame`: A pandas dataframe with the requested data.
+**Returns:**
 
-#### `fetch_all_symbols`
+- `DataFrame`: A pandas DataFrame containing `symbol`, `fundingRate`, `fundingTime` columns.
 
-Function to fetch all symbols from the Binance exchange.
+### `fetch_metrics`
 
-Parameters:
-- `exchange` (object): The exchange object initialized with ccxt library. Default is `config.EXCHANGE`.
-- `asset_type` (str, optional): The asset type for which symbols are fetched. Must be one of "spot", "futures/um", "futures/cm". Default is "spot".
+Convenience function to fetch metrics data.
 
-Returns:
-- `List[str]`: A list of symbol IDs based on the specified `asset_type`.
+**Parameters:**
 
-### Note
+- `symbol` (str): Binance market pair name, e.g., "BTCUSDT".
+- `start` (str or datetime): Start time for the data request.
+- `end` (str or datetime): End time for the data request.
+- `asset_type` (str): Asset type for the data request. Must be one of "spot", "futures/um", or "futures/cm".
+- `tz` (str, optional): Timezone for the returned DataFrame's datetime parameters. Default is None.
 
-The functions in this API require the `quantease_binance.utils` module and the `gen_dates`, `get_data`, `unify_datetime`, and `get_data_async` functions from it. Make sure to import them as well.
+**Returns:**
+
+- `DataFrame`: A pandas DataFrame containing `symbol`, `openInterest`, `numberOfTrades`, `volume`, `quoteVolume`, `takerBuyBaseAssetVolume`, `takerBuyQuoteAssetVolume`, `openTime`, `closeTime` columns.
+
+### `fetch_data`
+
+Main function to fetch data.
+
+**Parameters:**
+
+- `symbol` (str): Binance market pair name, e.g., "BTCUSDT".
+- `asset_type` (str): Asset type for the data request. Must be one of "spot", "futures/um", or "futures/cm".
+- `data_type` (str): Type of data to request. Must be one of "klines", "aggTrades", "bookTicker", "fundingRate", "metrics".
+- `start` (datetime): Start time for the data request.
+- `end` (datetime): End time for the data request.
+- `tz` (str, optional): Timezone for the returned DataFrame's datetime parameters. Default is "UTC".
+- `timeframe` (str, optional): Kline interval. Default is None.
+
+**Returns:**
+
+- `DataFrame`: A pandas DataFrame containing the requested data.
+
+### `fetch_all_symbols`
+
+Function to fetch all trading pairs from the Binance exchange.
+
+**Parameters:**
+
+- `exchange` (object): Exchange object initialized using the ccxt library. Default is `config.EXCHANGE`.
+- `asset_type` (str, optional): Asset type for the trading pairs to fetch. Must be one of "spot", "futures/um", or "futures/cm". Default is "spot".
+
+**Returns:**
+
+- `List[str]`: List of trading pair IDs based on the specified `asset_type`.
+
+### Notes
+
+Functions in this API require the `quantease_binance.utils` module and its `gen_dates`, `get_data`, `unify_datetime`, and `get_data_async` functions. Ensure to import them as well.
