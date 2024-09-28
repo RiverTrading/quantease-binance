@@ -16,6 +16,10 @@ python:
     - method: poetry
       path: .
 
+# Specify the operating system
+os:
+  - ubuntu-20.04  # 添加此行以指定操作系统
+
 # Build the documentation
 build:
   image: latest
