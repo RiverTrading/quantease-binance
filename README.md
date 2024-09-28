@@ -10,12 +10,12 @@ This project provides a Python API for fetching historical data from the Binance
 
 To use the functions in `quantease_binance`, you need to import the necessary modules and call the desired functions with appropriate parameters. Here are some examples:
 
-### Install Dependencies
+### Installation
 
-Make sure to install the required dependencies before running the code:
+`quantease-binance` can be installed using `pip`:
 
 ```bash
-pip install pandas pendulum asyncio uvloop tqdm
+pip install quantease-binance
 ```
 
 ### Fetch All Trading Pairs
