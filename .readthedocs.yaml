@@ -1,42 +1,26 @@
+# .readthedocs.yaml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
 version: 2
 
+# Set the OS, Python version and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.9"
+
+# Build documentation in the docs/ directory with Sphinx
 sphinx:
   configuration: docs/conf.py
 
+# Optionally build your docs in additional formats such as PDF and ePub
 formats:
-  - htmlzip
   - pdf
   - epub
 
+# Optionally set the version of Python and requirements required to build your docs
 python:
   install:
     - requirements: docs/requirements.txt
-  system_packages: true
-
-python:
-  - |
-    import os
-    
-    # 创建 docs 目录（如果不存在）
-    os.makedirs('docs', exist_ok=True)
-    
-    # 创建 index.rst 文件
-    with open('docs/index.rst', 'w') as f:
-        f.write("""
-    欢迎来到文档
-    ============
-
-    .. include:: ../README.md
-        :parser: myst_parser.sphinx_
-    """)
-    
-    # 创建 conf.py 文件
-    with open('docs/conf.py', 'w') as f:
-        f.write("""
-    extensions = ['myst_parser']
-    source_suffix = {
-        '.rst': 'restructuredtext',
-        '.md': 'markdown',
-    }
-    master_doc = 'index'
-    """)
