@@ -4,11 +4,11 @@ Quick Start Guide
 Installation
 ------------
 
-Make sure to install the required dependencies before running the code:
+`quantease-binance` can be installed using `pip`:
 
 .. code-block:: bash
 
-   pip install pandas pendulum asyncio uvloop tqdm
+   pip install quantease-binance
 
 Usage Examples
 --------------
