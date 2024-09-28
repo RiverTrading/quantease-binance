@@ -6,3 +6,5 @@ python_dateutil==2.9.0.post0
 tardis_dev==2.0.0a13
 tqdm==4.66.5
 uvloop==0.20.0
+sphinx==7.4.7
+sphinx_rtd_theme==2.0.0
