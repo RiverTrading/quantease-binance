@@ -178,11 +178,13 @@ def fetch_data(
         timeframe=timeframe,
     )
     if use_async:
-        if platform.system() == "linux":
+        if platform.system() == "linux" or platform.system() == "Darwin":
             import uvloop
             uvloop.install()
+        elif platform.system() == "Windows":
+            import winloop
+            winloop.install()
 
-        #uvloop.install()
         df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days, save_local))
     else:
         monthly_dfs = [
