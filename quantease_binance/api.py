@@ -182,8 +182,7 @@ def fetch_data(
             import uvloop
             uvloop.install()
         elif platform.system() == "Windows":
-            import winloop
-            winloop.install()
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
         df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days, save_local))
     else:

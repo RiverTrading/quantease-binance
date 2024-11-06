@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quantease-binance"
-version = "0.1.4"
+version = "0.1.8"
 description = "This project provides a Python API for fetching historical data from the Binance exchange. It includes functionalities for retrieving Klines, trades, aggregate trades, book ticker data, funding rates, and metrics."
 authors = ["river <shinachuan@gmail.com>"]
 license = "MIT"
@@ -15,8 +15,7 @@ pytest = "8.3.3"
 python-dateutil = "2.9.0.post0"
 tardis-dev = "2.0.0a13"
 tqdm = "4.66.5"
-uvloop = { version = "^0.21.0", markers = "sys_platform != 'Windows'" }
-winloop = { version = "^0.1.0", markers = "sys_platform == 'Windows'" }
+uvloop = { version = "^0.21.0", markers = "sys_platform != 'win32'" }
 
 
 [build-system]
