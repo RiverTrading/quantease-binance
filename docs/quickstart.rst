@@ -33,7 +33,7 @@ Fetch Data
 .. code-block:: python
 
    data = qb.fetch_data(
-       symbol = s,
+       symbol=s,
        data_type="klines",
        asset_type="futures/cm",
        start=i.availableSince,
@@ -41,6 +41,7 @@ Fetch Data
        timeframe="1m",
        use_async=True,
        save_local=True,
+       limit_rate=2/1,  # 2 requests per second
    )
     
 

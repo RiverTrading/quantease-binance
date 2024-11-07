@@ -95,30 +95,69 @@ fetch_metrics
 fetch_data
 ----------
 
-.. py:function:: fetch_data(symbol, asset_type, data_type, start, end, tz='UTC', timeframe=None)
+.. py:function:: fetch_data(symbol, asset_type, data_type, start, end, tz='UTC', timeframe=None, use_async=False, save_local=False, limit_rate=3/1)
 
    Main function to fetch data.
 
    :param str symbol: Binance market pair name, e.g., "BTCUSDT".
    :param str asset_type: Asset type for the data request. Must be one of "spot", "futures/um", or "futures/cm".
-   :param str data_type: Type of data to request. Must be one of "klines", "aggTrades", "bookTicker", "fundingRate", "metrics".
+   :param str data_type: Type of data to request. Must be one of "klines", "aggTrades", "bookTicker", "fundingRate", "trades", "metrics".
    :param datetime start: Start time for the data request.
    :param datetime end: End time for the data request.
    :param str tz: Timezone for the returned DataFrame's datetime parameters. Default is "UTC".
    :param str timeframe: Kline interval. Default is None.
-   :param bool use_async: Whether to use asynchronous requests. Default is False. It would increase the speed of the data fetching process but may cause issues with the Binance API rate limits.
-   :param bool save_local: Whether to save the fetched data locally. Default is False. The data will be saved in the ``.cache`` directory.
+   :param bool use_async: Whether to use asynchronous requests. Default is False.
+   :param bool save_local: Whether to save the fetched data locally. Default is False.
+   :param float limit_rate: Rate limit for API requests (requests per second). Default is 3/1.
    :return: A pandas DataFrame containing the requested data.
    :rtype: DataFrame
 
 fetch_all_symbols
 -----------------
 
-.. py:function:: fetch_all_symbols(exchange=config.EXCHANGE, asset_type='spot')
+.. py:function:: fetch_all_symbols(asset_type='spot')
 
    Function to fetch all trading pairs from the Binance exchange.
 
-   :param object exchange: Exchange object initialized using the ccxt library. Default is ``config.EXCHANGE``.
    :param str asset_type: Asset type for the trading pairs to fetch. Must be one of "spot", "futures/um", or "futures/cm". Default is "spot".
-   :return: List of trading pair IDs based on the specified ``asset_type``.
-   :rtype: List[str]
+   :return: Dictionary of trading pairs where key is the symbol and value is a Symbol object containing id, type, availableSince, and availableTo.
+   :rtype: Dict[str, Symbol]
+
+SymbolType
+----------
+
+.. py:class:: SymbolType
+
+   An enumeration class that defines the types of trading symbols available.
+
+   .. py:attribute:: SPOT
+      :type: str
+      :value: "spot"
+
+      Represents spot trading pairs (e.g., BTCUSDT for spot trading).
+
+   .. py:attribute:: PERP
+      :type: str
+      :value: "perpetual"
+
+      Represents perpetual futures contracts (e.g., BTCUSDT in USDⓈ-M Futures).
+
+   .. py:attribute:: FUTURE
+      :type: str
+      :value: "future"
+
+      Represents delivery futures contracts (e.g., BTCUSD_240628 in COIN-M Futures).
+
+Example usage:
+
+.. code-block:: python
+
+   from quantease_binance import SymbolType
+
+   # Check symbol type
+   if symbol.type == SymbolType.SPOT:
+       print("This is a spot trading pair")
+   elif symbol.type == SymbolType.PERP:
+       print("This is a perpetual futures contract")
+   elif symbol.type == SymbolType.FUTURE:
+       print("This is a delivery futures contract")
