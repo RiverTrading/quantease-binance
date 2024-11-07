@@ -325,7 +325,6 @@ async def download_data_async(
     session: aiohttp.ClientSession = None,
     limiter: asynciolimiter.Limiter = None,
 ) -> DataFrame:
-    await limiter.wait()
     assert data_type in [
         "klines",
         "aggTrades",
@@ -334,7 +333,7 @@ async def download_data_async(
         "trades",
         "metrics",
     ]
-
+    await limiter.wait()
     async def attempt_download():
         try:
             async with session.get(

@@ -23,7 +23,7 @@ from enum import Enum
 class SymbolType(Enum):
     SPOT = "spot"
     PERP = "perpetual"
-    FETURE = "future"
+    FUTURE = "future"
 
 
 def fetch_klines(
@@ -146,6 +146,7 @@ def fetch_data(
     timeframe: Optional[str] = None,
     use_async: Optional[bool] = False,
     save_local: Optional[bool] = False,
+    limit_rate: Optional[float] = 3 / 1, # 3 requests per second
 ) -> DataFrame:
     """
     :param symbol: The binance market pair name. e.g. ``'BTCUSDT'``.
@@ -191,7 +192,7 @@ def fetch_data(
         elif platform.system() == "Windows":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         
-        df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days, save_local))
+        df = asyncio.run(_gather(symbol=symbol, asset_type=asset_type, data_type=data_type, tz=tz, timeframe=timeframe, months=months, days=days, save_local=save_local, limit_rate=limit_rate))
     else:
         monthly_dfs = [
             get_data(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local)
@@ -215,12 +216,13 @@ async def _gather(
     timeframe: Optional[str] = None,
     months: List[datetime] = [],
     days: List[datetime] = [],
-    limit_rate: float = 2 / 1, # 3 requests per second
+    limit_rate: float = 3 / 1, # 3 requests per second
     save_local: Optional[bool] = False,
 ):
+
+    limiter = asynciolimiter.Limiter(rate=limit_rate)
+    session = aiohttp.ClientSession()
     try:
-        limiter = asynciolimiter.Limiter(rate=limit_rate)
-        session = aiohttp.ClientSession()
         monthly_dfs = [
             get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local, session, limiter)
             for dt in months
@@ -234,11 +236,11 @@ async def _gather(
             daily_dfs = []
         dfs = await tqdm.gather(*monthly_dfs, *daily_dfs)
         df = pd.concat(dfs)
+        return df
     except asyncio.CancelledError:
         print("Cancelled")
     finally:
         await session.close()
-    return df
 
 def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot") -> Dict[str, Symbol]:
     

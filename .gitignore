@@ -16,3 +16,8 @@ spot/
 linear/
 
 docs/_build/
+
+data/
+future_data/
+spot_data/
+perp_data/
