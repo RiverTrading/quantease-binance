@@ -5,6 +5,8 @@ import pandas as pd
 from pandas import DataFrame
 from dateutil import tz
 import asynciolimiter
+import ssl
+import certifi
 
 from .utils import Symbol
 from .utils import gen_dates, get_data, get_data_async, unify_datetime
@@ -13,7 +15,6 @@ from typing import Optional, Union, List, Literal
 import asyncio
 import platform
 import aiohttp
-#import uvloop
 
 from tqdm import tqdm
 from tqdm.asyncio import tqdm 
@@ -190,7 +191,8 @@ def fetch_data(
             import uvloop
             uvloop.install()
         elif platform.system() == "Windows":
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            import winloop
+            winloop.install()
         
         df = asyncio.run(_gather(symbol=symbol, asset_type=asset_type, data_type=data_type, tz=tz, timeframe=timeframe, months=months, days=days, save_local=save_local, limit_rate=limit_rate))
     else:
@@ -219,9 +221,9 @@ async def _gather(
     limit_rate: float = 3 / 1, # 3 requests per second
     save_local: Optional[bool] = False,
 ):
-
+    ssl_context = ssl.create_default_context(cafile=certifi.where())
     limiter = asynciolimiter.Limiter(rate=limit_rate)
-    session = aiohttp.ClientSession()
+    session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
     try:
         monthly_dfs = [
             get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local, session, limiter)
