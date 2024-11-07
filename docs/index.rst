@@ -6,6 +6,7 @@ Welcome to Quantease Binance's documentation!
    :caption: Contents:
 
    quickstart
+   example
    api
 
 Project Description
