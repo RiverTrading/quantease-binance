@@ -4,7 +4,7 @@ from typing import Dict
 import pandas as pd
 from pandas import DataFrame
 from dateutil import tz
-
+import asynciolimiter
 
 from .utils import Symbol
 from .utils import gen_dates, get_data, get_data_async, unify_datetime
@@ -12,11 +12,18 @@ from . import config
 from typing import Optional, Union, List, Literal
 import asyncio
 import platform
+import aiohttp
 #import uvloop
 
 from tqdm import tqdm
 from tqdm.asyncio import tqdm 
 from tardis_dev import get_exchange_details
+from enum import Enum
+
+class SymbolType(Enum):
+    SPOT = "spot"
+    PERP = "perpetual"
+    FETURE = "future"
 
 
 def fetch_klines(
@@ -183,7 +190,7 @@ def fetch_data(
             uvloop.install()
         elif platform.system() == "Windows":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
+        
         df = asyncio.run(_gather(symbol, asset_type, data_type, tz, timeframe, months, days, save_local))
     else:
         monthly_dfs = [
@@ -208,21 +215,29 @@ async def _gather(
     timeframe: Optional[str] = None,
     months: List[datetime] = [],
     days: List[datetime] = [],
+    limit_rate: float = 2 / 1, # 3 requests per second
     save_local: Optional[bool] = False,
 ):
-    monthly_dfs = [
-        get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local)
-        for dt in months
-    ]
-    if data_type != "fundingRate":
-        daily_dfs = [
-            get_data_async(data_type, asset_type, "daily", symbol, dt, tz, timeframe, save_local)
-            for dt in days
+    try:
+        limiter = asynciolimiter.Limiter(rate=limit_rate)
+        session = aiohttp.ClientSession()
+        monthly_dfs = [
+            get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local, session, limiter)
+            for dt in months
         ]
-    else:
-        daily_dfs = []
-    dfs = await tqdm.gather(*monthly_dfs, *daily_dfs)
-    df = pd.concat(dfs)
+        if data_type != "fundingRate":
+            daily_dfs = [
+                get_data_async(data_type, asset_type, "daily", symbol, dt, tz, timeframe, save_local, session, limiter)
+                for dt in days
+            ]
+        else:
+            daily_dfs = []
+        dfs = await tqdm.gather(*monthly_dfs, *daily_dfs)
+        df = pd.concat(dfs)
+    except asyncio.CancelledError:
+        print("Cancelled")
+    finally:
+        await session.close()
     return df
 
 def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = "spot") -> Dict[str, Symbol]:
@@ -243,7 +258,7 @@ def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = 
         if s["id"] not in ["FUTURES", "PERPETUALS", "SPOT"]:
             info[s['id']] = Symbol(
                 id = s['id'],
-                type = s['type'],
+                type = SymbolType(s['type']),
                 availableSince=pd.to_datetime(s['availableSince'], utc=True),
                 availableTo=pd.to_datetime(s['availableTo'], utc=True),
             )
@@ -271,4 +286,4 @@ def fetch_all_symbols(asset_type: Literal["spot", "futures/um", "futures/cm"] = 
     # elif asset_type == 'futures/cm':
     #     return futures_cm
     
-    
+

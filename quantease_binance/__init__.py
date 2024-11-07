@@ -1,6 +1,6 @@
 import sys
 
-from .api import fetch_klines, fetch_agg_trades, fetch_data, fetch_book_ticker, fetch_funding_rate, fetch_trades, fetch_metrics, fetch_all_symbols
+from .api import fetch_klines, fetch_agg_trades, fetch_data, fetch_book_ticker, fetch_funding_rate, fetch_trades, fetch_metrics, fetch_all_symbols, SymbolType
 
 from importlib import metadata
 import platform
@@ -13,4 +13,4 @@ else:
 
 del metadata, sys, platform
 
-__all__ = ["fetch_klines", "fetch_agg_trades", "fetch_data", "fetch_book_ticker", "fetch_funding_rate", "fetch_trades", "fetch_metrics", "fetch_all_symbols"]
+__all__ = ["fetch_klines", "fetch_agg_trades", "fetch_data", "fetch_book_ticker", "fetch_funding_rate", "fetch_trades", "fetch_metrics", "fetch_all_symbols", "SymbolType"]

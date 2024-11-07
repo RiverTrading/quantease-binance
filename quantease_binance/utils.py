@@ -1,6 +1,7 @@
 import datetime
 import io
 import asyncio
+import asynciolimiter
 import os
 import os.path
 import zipfile
@@ -14,6 +15,7 @@ from dateutil import parser
 import httpx
 import aiohttp
 import pandas as pd
+
 # import pendulum
 from pandas import Timestamp, DataFrame
 
@@ -27,6 +29,7 @@ class Symbol:
     type: str
     availableSince: pd.DatetimeIndex
     availableTo: pd.DatetimeIndex
+
 
 def gen_data_url(
     data_type: str,
@@ -42,7 +45,7 @@ def gen_data_url(
     https://data.binance.vision/data/spot/monthly/trades/1INCHBTC/1INCHBTC-trades-2024-04.zip
     https://data.binance.vision/data/futures/um/daily/metrics/1000BONKUSDC/1000BONKUSDC-metrics-2024-07-01.zip
     """
-    
+
     url: str
     date_str: str
 
@@ -79,20 +82,26 @@ def gen_data_url(
         )
     elif data_type == "fundingRate":
         if asset_type == "spot":
-            raise ValueError(f"asset_type must be 'futures/cm' or 'future/um', but got '{asset_type}'")
+            raise ValueError(
+                f"asset_type must be 'futures/cm' or 'future/um', but got '{asset_type}'"
+            )
         url = (
             f"https://data.binance.vision/data/{asset_type}/{freq}/{data_type}/{symbol}"
             f"/{symbol}-{data_type}-{date_str}.zip"
-        ) 
-    elif data_type == "metrics":    
+        )
+    elif data_type == "metrics":
         if asset_type == "spot":
-            raise ValueError(f"asset_type must be 'futures/cm' or 'future/um', but got '{asset_type}'")
+            raise ValueError(
+                f"asset_type must be 'futures/cm' or 'future/um', but got '{asset_type}'"
+            )
         url = (
             f"https://data.binance.vision/data/{asset_type}/{freq}/{data_type}/{symbol}"
             f"/{symbol}-{data_type}-{date_str}.zip"
-        )  
+        )
     else:
-        raise ValueError(f"data_type must in 'klines', 'aggTrades', 'bookTicker', 'fundingRate', but got '{data_type}'")
+        raise ValueError(
+            f"data_type must in 'klines', 'aggTrades', 'bookTicker', 'fundingRate', but got '{data_type}'"
+        )
     return url
 
 
@@ -103,6 +112,7 @@ def gen_data_url(
 #         return input.replace(tzinfo=None)
 #     else:
 #         raise TypeError(input)
+
 
 def unify_datetime(input: Union[str, datetime.datetime]) -> datetime.datetime:
     if isinstance(input, str):
@@ -176,14 +186,14 @@ def gen_dates(
         month_url = gen_data_url(
             data_type, asset_type, "monthly", symbol, month, timeframe=timeframe
         )
-        
+
         if exists_month(month_url):
             break
-        
+
         months.pop()
         start_year = month.year
         start_month = month.month
-    
+
     st = Timestamp(start_year, start_month, 1)
     if start_year and start_month and st != end:
         days = pd.date_range(
@@ -194,21 +204,24 @@ def gen_dates(
         ).to_list()
     else:
         days = []
-    
+
     non_existent_start = None
-    while months and not exists_month(gen_data_url(
-        data_type, asset_type, "monthly", symbol, months[0], timeframe=timeframe
-    )):
+    while months and not exists_month(
+        gen_data_url(
+            data_type, asset_type, "monthly", symbol, months[0], timeframe=timeframe
+        )
+    ):
         if non_existent_start is None:
             non_existent_start = months[0]
         months.pop(0)
-    
+
     if non_existent_start:
         non_existent_end = months[0] - pd.Timedelta(days=1) if months else end
         warning_message = f"Data does not exist for the period: {non_existent_start.strftime('%Y-%m')} to {non_existent_end.strftime('%Y-%m')}"
         warnings.warn(warning_message)
-    
+
     return months, days
+
 
 def get_data(
     data_type: str,
@@ -236,6 +249,7 @@ def get_data(
             return None
     return df
 
+
 async def get_data_async(
     data_type: str,
     asset_type: str,
@@ -245,6 +259,8 @@ async def get_data_async(
     data_tz: str,
     timeframe: Optional[str] = None,
     save_local: bool = False,
+    session: aiohttp.ClientSession = None,
+    limiter: asynciolimiter.Limiter = None,
 ) -> DataFrame:
     if data_type == "klines":
         assert timeframe is not None
@@ -254,7 +270,9 @@ async def get_data_async(
     df = load_data_from_disk(url)
     if df is None:
         try:
-            df = await download_data_async(data_type, data_tz, url)
+            df = await download_data_async(
+                data_type, data_tz, url, session=session, limiter=limiter
+            )
             save_data_to_disk(url, df, save_local)
         except DataNotFound:
             warn = f"Data not found: {url}"
@@ -264,7 +282,14 @@ async def get_data_async(
 
 
 def download_data(data_type: str, data_tz: str, url: str) -> DataFrame:
-    assert data_type in ["klines", "aggTrades", "bookTicker", "fundingRate", "trades", "metrics"]
+    assert data_type in [
+        "klines",
+        "aggTrades",
+        "bookTicker",
+        "fundingRate",
+        "trades",
+        "metrics",
+    ]
 
     try:
         resp = httpx.get(url)
@@ -291,23 +316,40 @@ def download_data(data_type: str, data_tz: str, url: str) -> DataFrame:
     elif data_type == "metrics":
         return load_metrics(data_tz, resp.content)
 
-async def download_data_async(data_type: str, data_tz: str, url: str, max_retries: int = 3) -> DataFrame:
-    assert data_type in ["klines", "aggTrades", "bookTicker", "fundingRate", "trades", "metrics"]
+
+async def download_data_async(
+    data_type: str,
+    data_tz: str,
+    url: str,
+    max_retries: int = 3,
+    session: aiohttp.ClientSession = None,
+    limiter: asynciolimiter.Limiter = None,
+) -> DataFrame:
+    await limiter.wait()
+    assert data_type in [
+        "klines",
+        "aggTrades",
+        "bookTicker",
+        "fundingRate",
+        "trades",
+        "metrics",
+    ]
 
     async def attempt_download():
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
-                    if resp.status == 200:
-                        content = await resp.read()
-                        return content
-                    elif resp.status == 404:
-                        raise DataNotFound(url)
-                    else:
-                        raise NetworkError(f"HTTP {resp.status}: {url}")
-            except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                raise NetworkError(str(e))
-            
+        try:
+            async with session.get(
+                url, timeout=aiohttp.ClientTimeout(total=30)
+            ) as resp:
+                if resp.status == 200:
+                    content = await resp.read()
+                    return content
+                elif resp.status == 404:
+                    raise DataNotFound(url)
+                else:
+                    raise NetworkError(f"HTTP {resp.status}: {url}")
+        except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+            raise NetworkError(str(e))
+
     for attempt in range(max_retries):
         try:
             content = await attempt_download()
@@ -315,8 +357,8 @@ async def download_data_async(data_type: str, data_tz: str, url: str, max_retrie
         except NetworkError as e:
             if attempt == max_retries - 1:  # Last attempt
                 raise
-            await asyncio.sleep(2 ** attempt)  # Exponential backoff
-            
+            await asyncio.sleep(2**attempt)  # Exponential backoff
+
     if data_type == "klines":
         return load_klines(data_tz, content)
     elif data_type == "aggTrades":
@@ -369,13 +411,22 @@ def load_agg_trades(data_tz: str, content: bytes) -> DataFrame:
                 csvfile,
                 header=0,
                 usecols=[0, 1, 2, 3, 4, 5, 6],
-                names=["agg_trade_id", "price", "quantity", "first_trade_id", "last_trade_id", "transact_time", "is_buyer_maker"],
+                names=[
+                    "agg_trade_id",
+                    "price",
+                    "quantity",
+                    "first_trade_id",
+                    "last_trade_id",
+                    "transact_time",
+                    "is_buyer_maker",
+                ],
             )
             df["datetime"] = pd.to_datetime(
                 df.transact_time, unit="ms", utc=True
             ).dt.tz_convert(data_tz)
             df.set_index("datetime", inplace=True)
     return df
+
 
 def load_book_ticker(data_tz: str, content: bytes) -> DataFrame:
     with zipfile.ZipFile(io.BytesIO(content)) as zipf:
@@ -385,13 +436,22 @@ def load_book_ticker(data_tz: str, content: bytes) -> DataFrame:
                 csvfile,
                 header=0,
                 usecols=[0, 1, 2, 3, 4, 5, 6],
-                names=["update_id", "bid_price", "bid_quantity", "ask_price", "ask_quantity", "transaction_time", "event_time"],
+                names=[
+                    "update_id",
+                    "bid_price",
+                    "bid_quantity",
+                    "ask_price",
+                    "ask_quantity",
+                    "transaction_time",
+                    "event_time",
+                ],
             )
             df["datetime"] = pd.to_datetime(
                 df.event_time, unit="ms", utc=True
             ).dt.tz_convert(data_tz)
             df.set_index("datetime", inplace=True)
     return df
+
 
 def load_funding_rate(data_tz: str, content: bytes) -> DataFrame:
     with zipfile.ZipFile(io.BytesIO(content)) as zipf:
@@ -409,6 +469,7 @@ def load_funding_rate(data_tz: str, content: bytes) -> DataFrame:
             df.set_index("datetime", inplace=True)
     return df
 
+
 def load_trades(data_tz: str, content: bytes) -> DataFrame:
     with zipfile.ZipFile(io.BytesIO(content)) as zipf:
         csv_name = zipf.namelist()[0]
@@ -419,11 +480,12 @@ def load_trades(data_tz: str, content: bytes) -> DataFrame:
                 usecols=[0, 1, 2, 3, 4, 5],
                 names=["id", "price", "qty", "base_qty", "time", "is_buyer_maker"],
             )
-            df["datetime"] = pd.to_datetime(
-                df.time, unit="ms", utc=True
-            ).dt.tz_convert(data_tz)
+            df["datetime"] = pd.to_datetime(df.time, unit="ms", utc=True).dt.tz_convert(
+                data_tz
+            )
             df.set_index("datetime", inplace=True)
     return df
+
 
 def load_metrics(data_tz: str, content: bytes) -> DataFrame:
     with zipfile.ZipFile(io.BytesIO(content)) as zipf:
@@ -433,12 +495,20 @@ def load_metrics(data_tz: str, content: bytes) -> DataFrame:
                 csvfile,
                 header=0,
                 usecols=range(8),
-                names=["create_time", "symbol", "sum_open_interest", "sum_open_interest_value", "count_toptrader_long_short_ratio", "sum_toptrader_long_short_ratio", 
-                       "count_long_short_ratio", "sum_taker_long_short_vol_ratio"],
+                names=[
+                    "create_time",
+                    "symbol",
+                    "sum_open_interest",
+                    "sum_open_interest_value",
+                    "count_toptrader_long_short_ratio",
+                    "sum_toptrader_long_short_ratio",
+                    "count_long_short_ratio",
+                    "sum_taker_long_short_vol_ratio",
+                ],
             )
-            df["datetime"] = pd.to_datetime(
-                df.create_time, utc=True
-            ).dt.tz_convert(data_tz)
+            df["datetime"] = pd.to_datetime(df.create_time, utc=True).dt.tz_convert(
+                data_tz
+            )
             df.set_index("datetime", inplace=True)
     return df
 

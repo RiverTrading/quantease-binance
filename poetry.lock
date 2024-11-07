@@ -182,6 +182,19 @@ files = [
 ]
 
 [[package]]
+name = "asynciolimiter"
+version = "1.0.0"
+description = "Rate limiter for Async IO"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "asynciolimiter-1.0.0-py3-none-any.whl", hash = "sha256:81f91400df1c9440b4b68b2ee65379241482ba9b78d58fb3401fcfad6f0e4407"},
+]
+
+[package.extras]
+build = ["sphinx", "twine", "wheel"]
+
+[[package]]
 name = "attrs"
 version = "24.2.0"
 description = "Classes Without Boilerplate"
@@ -1106,4 +1119,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "8c0a8bdfd1b909ae7873dedbbbcfb6bf2be473b618b2ff56ef20326063217926"
+content-hash = "a612c19156f3184f36069f93e9d3284ac4cd25a966e1b857990fb7ab50d13cb1"
