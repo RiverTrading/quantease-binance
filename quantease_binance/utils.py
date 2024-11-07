@@ -124,6 +124,9 @@ def unify_datetime(input: Union[str, datetime.datetime]) -> datetime.datetime:
 
 
 def exists_month(month_url):
+    if os.path.exists(get_local_data_path(month_url)):
+        return True
+
     try:
         resp = httpx.head(month_url)
     except (httpx.TimeoutException, httpx.NetworkError) as e:
@@ -333,7 +336,8 @@ async def download_data_async(
         "trades",
         "metrics",
     ]
-    await limiter.wait()
+    if limiter is not None:
+        await limiter.wait()
     async def attempt_download():
         try:
             async with session.get(
@@ -522,7 +526,7 @@ def save_data_to_disk(url: str, df: DataFrame, save_local: bool = False) -> None
     path = get_local_data_path(url)
     path.parent.mkdir(parents=True, exist_ok=True)
     # df.to_pickle(path)
-    if save_local:
+    if save_local and not os.path.exists(path):
         df.to_parquet(path)
 
 

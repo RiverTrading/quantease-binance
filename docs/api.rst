@@ -161,3 +161,19 @@ Example usage:
        print("This is a perpetual futures contract")
    elif symbol.type == SymbolType.FUTURE:
        print("This is a delivery futures contract")
+
+Configuration
+-------------
+
+The `quantease_binance` package allows users to configure certain settings directly in their code.
+
+- **Cache Directory**: By default, the package uses a `.cache` directory in the current working directory to store temporary files. You can change this by calling the `set_cache_dir` function.
+
+Example:
+
+.. code-block:: python
+
+   import quantease_binance as qb
+
+   # Set a custom cache directory
+   qb.config.set_cache_dir("/path/to/your/cache")

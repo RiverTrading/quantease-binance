@@ -147,7 +147,7 @@ def fetch_data(
     timeframe: Optional[str] = None,
     use_async: Optional[bool] = False,
     save_local: Optional[bool] = False,
-    limit_rate: Optional[float] = 3 / 1, # 3 requests per second
+    limit_rate: Optional[float] = None, # 3 requests per second
 ) -> DataFrame:
     """
     :param symbol: The binance market pair name. e.g. ``'BTCUSDT'``.
@@ -218,11 +218,14 @@ async def _gather(
     timeframe: Optional[str] = None,
     months: List[datetime] = [],
     days: List[datetime] = [],
-    limit_rate: float = 3 / 1, # 3 requests per second
+    limit_rate: float = None, # 3 requests per second
     save_local: Optional[bool] = False,
 ):
     ssl_context = ssl.create_default_context(cafile=certifi.where())
-    limiter = asynciolimiter.Limiter(rate=limit_rate)
+    if limit_rate is not None:
+        limiter = asynciolimiter.Limiter(rate=limit_rate)
+    else:
+        limiter = None
     session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
     try:
         monthly_dfs = [

@@ -22,6 +22,9 @@ To fetch all trading pairs from the Binance exchange, you can use the ``fetch_al
 
    import quantease_binance as qb
 
+   # Set a custom cache directory
+   qb.config.set_cache_dir("/path/to/your/cache")
+
    symbols = qb.fetch_all_symbols()
    print(symbols)
 
