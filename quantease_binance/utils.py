@@ -29,6 +29,13 @@ class Symbol:
     type: str
     availableSince: pd.DatetimeIndex
     availableTo: pd.DatetimeIndex
+    
+    @property
+    def active(self):
+        # set tz = UTC
+        if self.availableTo >= pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=1):
+            return True
+        return False
 
 
 def gen_data_url(
