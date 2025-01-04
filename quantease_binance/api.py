@@ -221,12 +221,17 @@ async def _gather(
     limit_rate: float = None, # 3 requests per second
     save_local: Optional[bool] = False,
 ):
+    headers = {
+        "Content-Type": "application/json;charset=UTF-8",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)"
+    }
+    
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     if limit_rate is not None:
         limiter = asynciolimiter.Limiter(rate=limit_rate)
     else:
         limiter = None
-    session = aiohttp.ClientSession()
+    session = aiohttp.ClientSession(headers=headers, connector=aiohttp.TCPConnector(ssl=ssl_context))
     try:
         monthly_dfs = [
             get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local, session, limiter)
@@ -241,7 +246,7 @@ async def _gather(
             daily_dfs = []
         dfs = await tqdm.gather(*monthly_dfs, *daily_dfs)
         df = pd.concat(dfs)
-        return df
+        return df    
     except asyncio.CancelledError:
         print("Cancelled")
     finally:
