@@ -226,7 +226,7 @@ async def _gather(
         limiter = asynciolimiter.Limiter(rate=limit_rate)
     else:
         limiter = None
-    session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
+    session = aiohttp.ClientSession()
     try:
         monthly_dfs = [
             get_data_async(data_type, asset_type, "monthly", symbol, dt, tz, timeframe, save_local, session, limiter)
