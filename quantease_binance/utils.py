@@ -375,7 +375,7 @@ async def download_data_async(
         try:
             content = await attempt_download()
             break
-        except NetworkError as e:
+        except NetworkError:
             if attempt == max_retries - 1:  # Last attempt
                 raise
             await asyncio.sleep(2**attempt)  # Exponential backoff
