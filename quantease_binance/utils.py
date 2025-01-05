@@ -3,6 +3,7 @@ import io
 import asyncio
 import asynciolimiter
 import os
+import time
 import os.path
 import zipfile
 import warnings
@@ -130,21 +131,31 @@ def unify_datetime(input: Union[str, datetime.datetime]) -> datetime.datetime:
         raise TypeError(f"Unsupported input type: {type(input)}")
 
 
-def exists_month(month_url):
-    if os.path.exists(get_local_data_path(month_url)):
+def exists_month(month_url, max_retries=5):
+    if get_local_data_path(month_url).exists():
         return True
-
-    try:
-        resp = httpx.head(month_url)
-    except (httpx.TimeoutException, httpx.NetworkError) as e:
-        raise NetworkError(e)
-
-    if resp.status_code == 200:
-        return True
-    elif resp.status_code == 404:
-        return False
-    else:
-        raise NetworkError(resp.status_code)
+        
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+    for attempt in range(max_retries):
+        try:
+            resp = httpx.get(month_url, headers=headers)
+            
+            if resp.status_code == 200:
+                return True
+            elif resp.status_code == 404:
+                return False
+            else:
+                raise NetworkError(resp.status_code)
+                
+        except (httpx.TimeoutException, httpx.NetworkError) as e:
+            if attempt == max_retries - 1:  # 最后一次尝试
+                raise NetworkError(e)
+            # 指数退避等待
+            time.sleep(2 ** attempt)
+            continue
 
 
 def gen_dates(

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quantease-binance"
-version = "0.1.14"
+version = "0.1.16"
 description = "This project provides a Python API for fetching historical data from the Binance exchange. It includes functionalities for retrieving Klines, trades, aggregate trades, book ticker data, funding rates, and metrics."
 authors = ["river <shinachuan@gmail.com>"]
 license = "MIT"
